@@ -1,0 +1,210 @@
+---
+title: Backend Setup
+description: Setting up and running the Parts Catalog backend application
+---
+
+## Overview
+
+The Parts Catalog backend is built with Java 11 and Spring Boot 2.4.3, providing a RESTful API for managing parts and vehicles. It uses Spring Data JPA for data persistence with PostgreSQL in production and H2 for testing.
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Java 11** - Required to run the application
+- **Maven** - For dependency management and building the project
+- **PostgreSQL** - Production database (see [Database Configuration](/backend/database))
+- **Spring Tools Suite 4** (recommended) - IDE for Spring Boot development
+
+## Project Structure
+
+The backend follows a standard Spring Boot project structure:
+
+```
+backend/
+├── src/
+│   ├── main/
+│   │   ├── java/br/com/tarcnux/spring/jpa/postgresql/
+│   │   │   ├── BackendApplication.java      # Main application class
+│   │   │   ├── controller/
+│   │   │   │   ├── PartController.java      # REST endpoints for parts
+│   │   │   │   └── VehicleController.java   # REST endpoints for vehicles
+│   │   │   ├── model/
+│   │   │   │   ├── Part.java                # Part entity
+│   │   │   │   └── Vehicle.java             # Vehicle entity
+│   │   │   └── repository/
+│   │   │       ├── PartRepository.java      # Part data access
+│   │   │       └── VehicleRepository.java   # Vehicle data access
+│   │   └── resources/
+│   │       └── application.properties       # Configuration file
+│   └── test/
+│       └── java/                            # Unit tests
+└── pom.xml                                  # Maven configuration
+```
+
+## Dependencies
+
+The project uses the following key dependencies (defined in `pom.xml`):
+
+### Core Dependencies
+
+- **Spring Boot Starter Data JPA** - ORM and database access
+- **Spring Boot Starter Web** - RESTful web services
+- **PostgreSQL Driver** - PostgreSQL database connectivity
+
+### Documentation
+
+- **Springfox Swagger 2** (v2.9.2) - API documentation generation
+- **Springfox Swagger UI** (v2.9.2) - Interactive API documentation interface
+
+### Testing
+
+- **Spring Boot Starter Test** - Testing framework with JUnit 5
+- **H2 Database** - In-memory database for unit tests
+
+## Configuration
+
+The application configuration is located in `src/main/resources/application.properties`:
+
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/partsCatalog
+spring.datasource.username=postgres
+spring.datasource.password=postgres
+
+spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+# Hibernate ddl auto (create, create-drop, validate, update)
+spring.jpa.hibernate.ddl-auto=update
+
+spring.jpa.open-in-view=false
+```
+
+<Note>
+  Make sure to update the database credentials if your PostgreSQL setup uses different username/password.
+</Note>
+
+## Running the Application
+
+<Steps>
+  <Step title="Using Spring Tools Suite">
+    1. Import the project: **File → Import → Maven → Existing Maven Projects**
+    2. Select the `backend` directory as the root
+    3. Right-click on `src/main/java`
+    4. Select **Run As → Spring Boot App**
+    
+    The application will start on `http://localhost:8080`
+  </Step>
+
+  <Step title="Using Maven Command Line">
+    Navigate to the backend directory and run:
+
+    ```bash
+    mvn spring-boot:run
+    ```
+
+    The application will start on `http://localhost:8080`
+  </Step>
+
+  <Step title="Building a JAR file">
+    To build an executable JAR file:
+
+    ```bash
+    mvn clean package
+    ```
+
+    Then run the JAR:
+
+    ```bash
+    java -jar target/backend-0.0.1-SNAPSHOT.jar
+    ```
+  </Step>
+</Steps>
+
+## API Documentation with Swagger
+
+Once the application is running, you can access the interactive API documentation:
+
+**Swagger UI:** [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+
+Swagger provides:
+- Complete API endpoint documentation
+- Interactive interface to test API calls
+- Request/response schemas
+- Parameter descriptions
+
+<Tip>
+  Use Swagger UI to explore and test all available endpoints without writing any client code.
+</Tip>
+
+## API Endpoints
+
+The REST API is available at `http://localhost:8080/api/v1` with the following endpoints:
+
+### Part Endpoints
+
+| Method | URL | Description |
+|--------|-----|-------------|
+| GET | `/parts` | Retrieve all parts (alphabetically) |
+| GET | `/parts/:id` | Retrieve a specific part by ID |
+| GET | `/parts?name=[keyword]` | Search parts by name |
+| GET | `/parts?vehicle=[keyword]` | Search parts by vehicle application |
+| POST | `/parts` | Create a new part |
+| PUT | `/parts/:id` | Update a part |
+| DELETE | `/parts/:id` | Delete a part |
+| DELETE | `/parts` | Delete all parts |
+
+### Vehicle Endpoints
+
+| Method | URL | Description |
+|--------|-----|-------------|
+| GET | `/vehicles` | Retrieve all vehicles |
+| GET | `/vehicles/:id` | Retrieve a specific vehicle |
+| POST | `/vehicles` | Create a new vehicle |
+| PUT | `/vehicles/:id` | Update a vehicle |
+| DELETE | `/vehicles/:id` | Delete a vehicle |
+
+### Part-Vehicle Relationship Endpoints
+
+| Method | URL | Description |
+|--------|-----|-------------|
+| GET | `/parts/:partId/vehicles` | List vehicles related to a part |
+| POST | `/parts/:partId/vehicles/:vehicleId` | Associate a vehicle with a part |
+| DELETE | `/parts/:partId/vehicles/:vehicleId` | Remove part-vehicle association |
+
+## Example API Requests
+
+### Create a New Part
+
+```json
+POST /api/v1/parts
+{
+  "name": "Polia",
+  "applicationVehicle": "Fusca",
+  "netWeight": 9.87,
+  "grossWeight": 10.98
+}
+```
+
+### Update a Part
+
+```json
+PUT /api/v1/parts/1
+{
+  "name": "Polia Atualizada",
+  "applicationVehicle": "Fusca",
+  "netWeight": 9.87,
+  "grossWeight": 10.98
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Database Configuration" icon="database" href="/backend/database">
+    Learn how to configure PostgreSQL and understand the data model
+  </Card>
+  <Card title="Testing" icon="vial" href="/backend/testing">
+    Run unit tests and learn about the testing strategy
+  </Card>
+</CardGroup>

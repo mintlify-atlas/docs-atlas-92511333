@@ -1,0 +1,151 @@
+---
+title: "List Vehicle Relationships"
+api: "GET /api/v1/parts/{partId}/vehicles"
+description: "Retrieve all vehicles associated with a specific part"
+---
+
+## Overview
+
+This endpoint returns a set of all vehicles that are linked to a specific part. It's useful for understanding part compatibility and finding which vehicles can use a particular component.
+
+## Endpoint
+
+```
+GET /api/v1/parts/{partId}/vehicles
+```
+
+## Path Parameters
+
+<ParamField path="partId" type="Long" required>
+  The unique identifier of the part whose vehicle relationships you want to retrieve
+</ParamField>
+
+## Response
+
+Returns a `Set<Vehicle>` containing all vehicles associated with the specified part.
+
+### Response Structure
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Fusca",
+    "manufacturer": "Volkswagen",
+    "year": 1970
+  },
+  {
+    "id": 2,
+    "name": "Gol",
+    "manufacturer": "Volkswagen",
+    "year": 2020
+  }
+]
+```
+
+### Success Response
+
+<ResponseField name="200 OK" type="Set<Vehicle>">
+  Successfully retrieved the set of vehicles. Returns an empty set if no vehicles are associated with the part.
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404 NOT_FOUND" type="Error">
+  The specified part ID does not exist in the database.
+</ResponseField>
+
+## Controller Implementation
+
+The endpoint is implemented in the `PartController` class:
+
+```java
+@GetMapping("/parts/{partId}/vehicles")
+@ApiOperation(value = "Lista os veículos relacionados a uma peça")
+@ResponseStatus(HttpStatus.OK)
+public ResponseEntity<Set<Vehicle>> getVehiclesByPart(@PathVariable("partId") Long partId) {
+    Optional<Part> partData = partRepository.findById(partId);
+    if (!partData.isPresent()) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    return new ResponseEntity<>(partData.get().getVehicles(), HttpStatus.OK);
+}
+```
+
+Reference: `~/workspace/source/backend/src/main/java/br/com/tarcnux/spring/jpa/postgresql/controller/PartController.java:143-152`
+
+## Example Usage
+
+### Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET "http://localhost:8080/api/v1/parts/1/vehicles" \
+  -H "Accept: application/json"
+```
+
+```javascript JavaScript
+fetch('http://localhost:8080/api/v1/parts/1/vehicles', {
+  method: 'GET',
+  headers: {
+    'Accept': 'application/json'
+  }
+})
+  .then(response => response.json())
+  .then(data => console.log(data));
+```
+
+```java Java
+RestTemplate restTemplate = new RestTemplate();
+String url = "http://localhost:8080/api/v1/parts/1/vehicles";
+ResponseEntity<Set> response = restTemplate.getForEntity(url, Set.class);
+Set<Vehicle> vehicles = response.getBody();
+```
+
+```python Python
+import requests
+
+url = "http://localhost:8080/api/v1/parts/1/vehicles"
+response = requests.get(url)
+vehicles = response.json()
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Fusca",
+    "manufacturer": "Volkswagen",
+    "year": 1970
+  },
+  {
+    "id": 3,
+    "name": "Kombi",
+    "manufacturer": "Volkswagen",
+    "year": 1975
+  }
+]
+```
+
+## Use Cases
+
+- **Part Compatibility Check** - Verify which vehicles can use a specific part before making inventory decisions
+- **Customer Assistance** - Help customers identify if a part fits their vehicle
+- **Inventory Planning** - Understand the demand scope for a particular part
+- **Cross-Reference** - Build compatibility tables for parts catalogs
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card title="Add Relationship" icon="plus" href="/api/relationships/add">
+    Link a new vehicle to this part
+  </Card>
+  <Card title="Remove Relationship" icon="trash" href="/api/relationships/remove">
+    Remove a vehicle from this part
+  </Card>
+</CardGroup>

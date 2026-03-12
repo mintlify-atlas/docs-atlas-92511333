@@ -1,0 +1,288 @@
+---
+title: Vue Components
+description: Overview of the Vue.js component architecture and structure
+---
+
+The Parts Catalog frontend uses a component-based architecture with Vue.js 2.6.11. Each component handles a specific part of the user interface and business logic.
+
+## Component Architecture
+
+The application follows a typical Vue.js structure:
+
+```
+src/
+├── App.vue                    # Root component with navigation
+├── main.js                    # Application entry point
+├── router.js                  # Route definitions
+├── http-common.js             # Axios configuration
+├── components/
+│   ├── PartsList.vue         # List and search parts
+│   ├── AddPart.vue           # Create new parts
+│   ├── Part.vue              # View/edit part details
+│   ├── VehiclesList.vue      # List vehicles
+│   └── AddVehicle.vue        # Create new vehicles
+└── services/
+    ├── PartDataService.js    # Part API calls
+    └── VehicleDataService.js # Vehicle API calls
+```
+
+## Root Component
+
+### App.vue
+
+The root component provides the navigation bar and router outlet for all pages.
+
+```vue
+<template>
+  <div id="app">
+    <nav class="navbar navbar-expand navbar-light" style="background-color:#e77924">
+      <router-link to="/" class="navbar-brand">Catálogo</router-link>
+      <div class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a href="/parts" class="nav-link" style="font-size:1.3em">Listar Peças</a>
+        </li>
+        <li class="nav-item">
+          <router-link to="/add" class="nav-link" style="font-size:1.3em">Cadastrar peça</router-link>
+        </li>
+        <li class="nav-item">
+          <router-link to="/vehicles" class="nav-link" style="font-size:1.3em">Listar veículos</router-link>
+        </li>
+        <li class="nav-item">
+          <router-link to="/vehicles/add" class="nav-link" style="font-size:1.3em">Cadastrar veículo</router-link>
+        </li>
+      </div>
+    </nav>
+
+    <div class="container mt-3">
+      <router-view />
+    </div>
+  </div>
+</template>
+```
+
+**Features:**
+- Bootstrap navbar with custom branding color
+- Router links for navigation
+- Container for child components
+
+## Component Details
+
+<AccordionGroup>
+  <Accordion title="PartsList.vue - List and Search Parts">
+    **Purpose:** Display all parts with search and delete functionality.
+
+    **Key Features:**
+    - List parts in alphabetical order
+    - Search by part name
+    - Search by application vehicle
+    - View part details
+    - Delete individual parts
+    - Delete all parts
+
+    **Data Structure:**
+    ```javascript
+    data() {
+      return {
+        parts: [],              // Array of parts
+        currentPart: null,      // Selected part
+        currentIndex: -1,       // Selected index
+        name: "",               // Search by name
+        applicationVehicle: "" // Search by vehicle
+      };
+    }
+    ```
+
+    **Main Methods:**
+    - `retrieveParts()` - Fetch all parts from API
+    - `searchByName()` - Search parts by name
+    - `searchByApplicationVehicle()` - Search by vehicle
+    - `setActivePart(part, index)` - Select a part to view details
+    - `deletePart(part, index)` - Delete a single part
+    - `removeAllParts()` - Delete all parts
+
+    **Location:** `src/components/PartsList.vue`
+  </Accordion>
+
+  <Accordion title="AddPart.vue - Create New Parts">
+    **Purpose:** Form to add new parts to the catalog.
+
+    **Key Features:**
+    - Input validation
+    - Form validation (net weight cannot exceed gross weight)
+    - Success/error messages
+    - Reset form after submission
+
+    **Data Structure:**
+    ```javascript
+    data() {
+      return {
+        part: {
+          id: null,
+          name: "",
+          applicationVehicle: "",
+          netWeight: "",
+          grossWeight: ""
+        },
+        submitted: false,
+        errors: []
+      };
+    }
+    ```
+
+    **Validation Rules:**
+    - Name is required
+    - Net weight is required
+    - Gross weight is required
+    - Net weight must not exceed gross weight
+    - Maximum 200 characters for text fields
+    - Decimal numbers with 2 decimal places
+
+    **Main Methods:**
+    - `savePart()` - Validate and create new part
+    - `newPart()` - Reset form for another entry
+
+    **Location:** `src/components/AddPart.vue`
+  </Accordion>
+
+  <Accordion title="Part.vue - View and Edit Part Details">
+    **Purpose:** Display and edit detailed information about a specific part.
+
+    **Key Features:**
+    - View part details
+    - Update part information
+    - Delete part
+    - Link/unlink vehicles to the part
+    - Display related vehicles
+
+    **Data Structure:**
+    ```javascript
+    data() {
+      return {
+        currentPart: null,       // Part being edited
+        message: "",             // Status message
+        errors: [],              // Validation errors
+        relatedVehicles: [],     // Vehicles linked to this part
+        availableVehicles: [],   // All available vehicles
+        selectedVehicleId: ""    // Vehicle to link
+      };
+    }
+    ```
+
+    **Main Methods:**
+    - `getPart(id)` - Fetch part by ID
+    - `updatePart()` - Update part with validation
+    - `deletePart()` - Delete the current part
+    - `linkVehicle()` - Associate a vehicle with the part
+    - `unlinkVehicle(vehicleId)` - Remove vehicle association
+    - `retrieveRelatedVehicles()` - Get vehicles linked to part
+
+    **Route Parameter:** Receives `id` from route (`/parts/:id`)
+
+    **Location:** `src/components/Part.vue`
+  </Accordion>
+
+  <Accordion title="VehiclesList.vue - List Vehicles">
+    **Purpose:** Display all vehicles with search and management features.
+
+    **Key Features:**
+    - List all vehicles
+    - Search by vehicle name
+    - View vehicle details
+    - Delete individual vehicles
+    - Delete all vehicles
+
+    <Note>
+      Component structure is similar to PartsList.vue but for vehicles.
+    </Note>
+
+    **Location:** `src/components/VehiclesList.vue`
+  </Accordion>
+
+  <Accordion title="AddVehicle.vue - Create New Vehicles">
+    **Purpose:** Form to add new vehicles to the system.
+
+    **Key Features:**
+    - Vehicle name input
+    - Form validation
+    - Success confirmation
+
+    <Note>
+      Component structure is similar to AddPart.vue but for vehicles.
+    </Note>
+
+    **Location:** `src/components/AddVehicle.vue`
+  </Accordion>
+</AccordionGroup>
+
+## Component Communication
+
+Components interact with the backend through data services:
+
+### PartDataService
+
+```javascript
+class PartDataService {
+  getAll()                    // Get all parts
+  get(id)                     // Get part by ID
+  create(data)                // Create new part
+  update(id, data)            // Update part
+  delete(id)                  // Delete part
+  deleteAll()                 // Delete all parts
+  findByName(name)            // Search by name
+  findByVehicle(vehicle)      // Search by vehicle
+}
+```
+
+### VehicleDataService
+
+```javascript
+class VehicleDataService {
+  getAll()                        // Get all vehicles
+  get(id)                         // Get vehicle by ID
+  create(data)                    // Create new vehicle
+  update(id, data)                // Update vehicle
+  delete(id)                      // Delete vehicle
+  deleteAll()                     // Delete all vehicles
+  findByName(name)                // Search by name
+  findByPart(partId)              // Get vehicles for a part
+  addToPart(partId, vehicleId)    // Link vehicle to part
+  removeFromPart(partId, vehicleId) // Unlink vehicle from part
+}
+```
+
+## Styling
+
+All components use Bootstrap for styling with custom CSS overrides:
+
+- Custom brand color: `#e77924` (orange)
+- Responsive layout with Bootstrap grid
+- Form controls with validation feedback
+- List groups for data display
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Lifecycle Hooks" icon="arrows-rotate">
+    Components use `mounted()` hook to fetch initial data from the API.
+  </Card>
+  <Card title="Error Handling" icon="triangle-exclamation">
+    All API calls include `.catch()` for error handling with console logging.
+  </Card>
+  <Card title="Validation" icon="check">
+    Client-side validation before API calls to improve UX.
+  </Card>
+  <Card title="Routing" icon="route">
+    Navigation uses Vue Router with programmatic navigation after operations.
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Routing" icon="route" href="/frontend/routing">
+    Learn about route configuration
+  </Card>
+  <Card title="Backend API" icon="server" href="/api/parts/overview">
+    Explore the backend API endpoints
+  </Card>
+</CardGroup>

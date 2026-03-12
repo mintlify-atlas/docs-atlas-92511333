@@ -1,97 +1,65 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Parts Catalog"
+description: "Manage your auto parts inventory with vehicle associations"
 ---
 
-## Setting up
+<div style={{
+  background: 'linear-gradient(135deg, #df7e38 0%, #667e93 100%)',
+  borderRadius: '6px',
+  padding: '48px 32px',
+  marginBottom: '32px',
+  color: '#ffffff'
+}}>
+  <h1 style={{ color: '#ffffff', fontSize: '36px', fontWeight: '400', marginBottom: '16px' }}>Parts Catalog</h1>
+  <p style={{ color: '#f2f0ef', fontSize: '18px', marginBottom: '24px' }}>
+    A full-stack web application for managing auto parts catalogs with many-to-many vehicle relationships
+  </p>
+</div>
 
-Get your documentation site up and running in minutes.
+## Get Started
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+Launch your Parts Catalog application and start managing your inventory.
 
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Set up and run the application in minutes
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="API Reference" icon="code" href="/api/parts/overview">
+    Explore the REST API endpoints
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Key Features
 
-Everything you need to create world-class documentation.
+Parts Catalog provides comprehensive inventory management capabilities.
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
+<CardGroup cols={2}>
+  <Card title="Parts Management" icon="gear" href="/features/parts-management">
+    Create, update, search, and delete auto parts with detailed specifications
   </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
+  <Card title="Vehicle Management" icon="car" href="/features/vehicles-management">
+    Organize parts by compatible vehicles and applications
   </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
+  <Card title="Relationships" icon="link" href="/features/relationships">
+    Link parts to multiple vehicles with many-to-many associations
   </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
+  <Card title="Search & Filter" icon="magnifying-glass" href="/api/parts/search">
+    Find parts by name or vehicle application keyword
   </Card>
-</Columns>
+</CardGroup>
 
-## Need inspiration?
+## Technology Stack
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+Built with modern, production-ready technologies.
+
+<CardGroup cols={3}>
+  <Card title="Spring Boot Backend" icon="java" href="/backend/setup">
+    Java 11 with Spring Data JPA and PostgreSQL
+  </Card>
+  <Card title="Vue.js Frontend" icon="vuejs" href="/frontend/setup">
+    Vue 2 with Vue Router and Axios
+  </Card>
+  <Card title="REST API" icon="webhook" href="/api/parts/overview">
+    Swagger-documented endpoints at /api/v1
+  </Card>
+</CardGroup>

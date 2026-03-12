@@ -1,0 +1,168 @@
+---
+title: 'Retrieve Vehicles'
+description: 'Get all vehicles or a specific vehicle by ID'
+---
+
+## Get All Vehicles
+
+```
+GET /api/v1/vehicles
+```
+
+Retrieves all vehicles in alphabetical order by name. Supports optional filtering by name.
+
+### Query Parameters
+
+<ParamField query="name" type="string" optional>
+  Filter vehicles by name (case-insensitive partial match). If provided, returns only vehicles whose name contains the specified keyword.
+</ParamField>
+
+### Example Requests
+
+**Get all vehicles:**
+```bash
+curl http://localhost:8080/api/v1/vehicles
+```
+
+**Filter by name:**
+```bash
+curl http://localhost:8080/api/v1/vehicles?name=fus
+```
+
+### Response
+
+**Status Code:** `200 OK`
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Fusca"
+  },
+  {
+    "id": 3,
+    "name": "Gol"
+  },
+  {
+    "id": 2,
+    "name": "Kombi"
+  }
+]
+```
+
+### Status Codes
+
+<ResponseField name="200" type="OK">
+  Vehicles successfully retrieved
+</ResponseField>
+
+<ResponseField name="204" type="No Content">
+  No vehicles found matching the criteria
+</ResponseField>
+
+<ResponseField name="500" type="Internal Server Error">
+  An error occurred while retrieving vehicles
+</ResponseField>
+
+### Controller Implementation
+
+```java
+@GetMapping("/vehicles")
+@ApiOperation(value = "Exibe todos os veículos em ordem alfabética")
+@ResponseStatus(HttpStatus.OK)
+public ResponseEntity<List<Vehicle>> getAllVehicles(@RequestParam(required = false) String name) {
+    try {
+        List<Vehicle> vehicles = new ArrayList<>();
+        if (name == null) {
+            vehicleRepository.findByOrderByNameAsc().forEach(vehicles::add);
+        } else {
+            vehicleRepository.findByNameContainingIgnoreCaseOrderByNameAsc(name).forEach(vehicles::add);
+        }
+
+        if (vehicles.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(vehicles, HttpStatus.OK);
+    } catch (Exception e) {
+        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
+```
+
+**Source:** `VehicleController.java:37-56`
+
+---
+
+## Get Vehicle by ID
+
+```
+GET /api/v1/vehicles/{id}
+```
+
+Retrieves a specific vehicle by its unique identifier.
+
+### Path Parameters
+
+<ParamField path="id" type="long" required>
+  The unique identifier of the vehicle to retrieve
+</ParamField>
+
+### Example Request
+
+```bash
+curl http://localhost:8080/api/v1/vehicles/1
+```
+
+### Response
+
+**Status Code:** `200 OK`
+
+```json
+{
+  "id": 1,
+  "name": "Fusca"
+}
+```
+
+### Response Fields
+
+<ResponseField name="id" type="long">
+  The unique identifier of the vehicle
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  The name of the vehicle
+</ResponseField>
+
+### Status Codes
+
+<ResponseField name="200" type="OK">
+  Vehicle successfully retrieved
+</ResponseField>
+
+<ResponseField name="404" type="Not Found">
+  Vehicle with the specified ID does not exist
+</ResponseField>
+
+### Controller Implementation
+
+```java
+@GetMapping("/vehicles/{id}")
+@ApiOperation(value = "Exibe um veículo específico")
+@ResponseStatus(HttpStatus.OK)
+public ResponseEntity<Vehicle> getVehicleById(@PathVariable("id") Long id) {
+    Optional<Vehicle> vehicleData = vehicleRepository.findById(id);
+    if (vehicleData.isPresent()) {
+        return new ResponseEntity<>(vehicleData.get(), HttpStatus.OK);
+    }
+    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+}
+```
+
+**Source:** `VehicleController.java:58-67`
+
+## Notes
+
+- Vehicles are always returned in alphabetical order by name
+- The name filter performs a case-insensitive partial match
+- An empty result set returns `204 No Content` instead of an empty array

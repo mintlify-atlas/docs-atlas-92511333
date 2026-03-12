@@ -1,0 +1,290 @@
+---
+title: 'Search Parts'
+description: 'Search for parts by name or vehicle application'
+api: 'GET /api/v1/parts'
+---
+
+## Overview
+
+The search functionality is built into the main GET endpoint and allows you to find parts by keyword matching on either the part name or the vehicle application field.
+
+## Search by Part Name
+
+```
+GET http://localhost:8080/api/v1/parts?name={keyword}
+```
+
+Searches for parts where the name contains the specified keyword (case-insensitive). Results are returned in alphabetical order by name.
+
+### Query Parameters
+
+<ParamField query="name" type="string" required>
+  Keyword to search for in part names. The search is case-insensitive and matches partial strings.
+</ParamField>
+
+### Response
+
+Returns an array of Part objects matching the search criteria.
+
+<ResponseField name="id" type="long">
+  Unique identifier for the part
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Name of the part (contains the search keyword)
+</ResponseField>
+
+<ResponseField name="applicationVehicle" type="string">
+  Vehicle application description
+</ResponseField>
+
+<ResponseField name="netWeight" type="double">
+  Net weight of the part
+</ResponseField>
+
+<ResponseField name="grossWeight" type="double">
+  Gross weight of the part
+</ResponseField>
+
+### Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 OK | Parts found matching the search criteria |
+| 204 No Content | No parts found matching the search criteria |
+| 500 Internal Server Error | An error occurred |
+
+### Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET "http://localhost:8080/api/v1/parts?name=polia"
+```
+
+```javascript JavaScript
+const keyword = 'polia';
+const response = await fetch(`http://localhost:8080/api/v1/parts?name=${keyword}`);
+const parts = await response.json();
+console.log(parts);
+```
+
+```python Python
+import requests
+
+keyword = 'polia'
+response = requests.get(f'http://localhost:8080/api/v1/parts?name={keyword}')
+parts = response.json()
+print(parts)
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json 200 OK
+[
+  {
+    "id": 2,
+    "name": "Polia",
+    "applicationVehicle": "Fusca",
+    "netWeight": 9.87,
+    "grossWeight": 10.98
+  },
+  {
+    "id": 5,
+    "name": "Polia Alternador",
+    "applicationVehicle": "Gol",
+    "netWeight": 3.5,
+    "grossWeight": 4.2
+  }
+]
+```
+
+---
+
+## Search by Vehicle Application
+
+```
+GET http://localhost:8080/api/v1/parts?vehicle={keyword}
+```
+
+Searches for parts where the vehicle application contains the specified keyword (case-insensitive). Results are returned in alphabetical order by part name.
+
+### Query Parameters
+
+<ParamField query="vehicle" type="string" required>
+  Keyword to search for in vehicle application fields. The search is case-insensitive and matches partial strings.
+</ParamField>
+
+### Response
+
+Returns an array of Part objects where the vehicle application matches the search criteria.
+
+<ResponseField name="id" type="long">
+  Unique identifier for the part
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Name of the part
+</ResponseField>
+
+<ResponseField name="applicationVehicle" type="string">
+  Vehicle application description (contains the search keyword)
+</ResponseField>
+
+<ResponseField name="netWeight" type="double">
+  Net weight of the part
+</ResponseField>
+
+<ResponseField name="grossWeight" type="double">
+  Gross weight of the part
+</ResponseField>
+
+### Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 OK | Parts found matching the search criteria |
+| 204 No Content | No parts found matching the search criteria |
+| 500 Internal Server Error | An error occurred |
+
+### Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET "http://localhost:8080/api/v1/parts?vehicle=fusca"
+```
+
+```javascript JavaScript
+const keyword = 'fusca';
+const response = await fetch(`http://localhost:8080/api/v1/parts?vehicle=${keyword}`);
+const parts = await response.json();
+console.log(parts);
+```
+
+```python Python
+import requests
+
+keyword = 'fusca'
+response = requests.get(f'http://localhost:8080/api/v1/parts?vehicle={keyword}')
+parts = response.json()
+print(parts)
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json 200 OK
+[
+  {
+    "id": 3,
+    "name": "Alternador",
+    "applicationVehicle": "Fusca",
+    "netWeight": 5.5,
+    "grossWeight": 6.2
+  },
+  {
+    "id": 2,
+    "name": "Polia",
+    "applicationVehicle": "Fusca",
+    "netWeight": 9.87,
+    "grossWeight": 10.98
+  }
+]
+```
+
+## Controller Implementation
+
+The search logic is implemented in the `getAllParts` method:
+
+```java PartController.java:43-71
+@GetMapping("/parts")
+@ApiOperation(value = "Exibe todas as peças em ordem alfabética")
+@ResponseStatus(HttpStatus.OK)
+public ResponseEntity<List<Part>> getAllParts(
+        @RequestParam(required = false) String name,
+        @RequestParam(required = false) String vehicle) {
+    
+    try {
+        List<Part> parts = new ArrayList<Part>();
+        
+        if (name == null && vehicle == null) {
+            partRepository.findByOrderByNameAsc().forEach(parts::add);
+        } else if (vehicle == null) {
+            partRepository.findByNameContainingIgnoreCaseOrderByNameAsc(name)
+                .forEach(parts::add);
+        } else {
+            partRepository.findByApplicationVehicleContainingIgnoreCaseOrderByNameAsc(vehicle)
+                .forEach(parts::add);
+        }
+        
+        if (parts.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        
+        return new ResponseEntity<List<Part>>(parts, HttpStatus.OK);
+        
+    } catch (Exception e) {
+        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
+```
+
+## Search Behavior
+
+<Info>
+  **Search Priority**: When both `name` and `vehicle` parameters are provided, the `vehicle` parameter takes precedence and the `name` parameter is ignored.
+</Info>
+
+### Key Features
+
+1. **Case-Insensitive**: Searches are case-insensitive, so "fusca", "Fusca", and "FUSCA" will all return the same results
+2. **Partial Matching**: The search matches any part of the field (substring matching)
+3. **Alphabetical Results**: All search results are sorted alphabetically by part name
+4. **No Results**: Returns 204 No Content if no parts match the search criteria
+
+### Examples
+
+<Accordion title="Search for 'polia' in part names">
+  ```bash
+  curl "http://localhost:8080/api/v1/parts?name=polia"
+  ```
+  
+  Matches:
+  - "Polia"
+  - "Polia Alternador"
+  - "Kit Polia Compressor"
+</Accordion>
+
+<Accordion title="Search for 'fus' in vehicle applications">
+  ```bash
+  curl "http://localhost:8080/api/v1/parts?vehicle=fus"
+  ```
+  
+  Matches parts with vehicle applications like:
+  - "Fusca"
+  - "Fusca 1970-1980"
+  - Any other application containing "fus"
+</Accordion>
+
+## Tips for Effective Searching
+
+1. **Use partial keywords**: You don't need to type the complete word. "alt" will match "Alternador"
+2. **Case doesn't matter**: Search is case-insensitive, so search however is comfortable for you
+3. **Empty results**: A 204 status code means no matches were found, not an error
+4. **Special characters**: URL-encode special characters in query parameters
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card title="Retrieve All Parts" icon="list" href="/api/parts/retrieve">
+    Get all parts without filtering
+  </Card>
+  
+  <Card title="Create Part" icon="plus" href="/api/parts/create">
+    Add a new part to the catalog
+  </Card>
+</CardGroup>

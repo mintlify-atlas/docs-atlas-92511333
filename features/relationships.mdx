@@ -1,0 +1,248 @@
+---
+title: Part-Vehicle Relationships
+description: Link parts to compatible vehicles with many-to-many relationships
+---
+
+The Part-Vehicle Relationships feature enables you to create associations between parts and the vehicles they're compatible with. This many-to-many relationship system allows a single part to be linked to multiple vehicles, and a single vehicle to be associated with many parts.
+
+## Overview
+
+The relationship management system provides:
+
+- Many-to-many associations between parts and vehicles
+- Visual display of linked vehicles for each part
+- Easy linking and unlinking of vehicle associations
+- Improved searchability and catalog organization
+
+## Understanding Many-to-Many Relationships
+
+The system uses a many-to-many relationship model:
+
+<CardGroup cols={2}>
+  <Card title="One Part, Multiple Vehicles" icon="car">
+    A single part (like a universal oil filter) can be compatible with multiple vehicles (Fusca, Golf, Civic, etc.).
+  </Card>
+  
+  <Card title="One Vehicle, Multiple Parts" icon="gear">
+    A single vehicle can have many compatible parts associated with it in your catalog.
+  </Card>
+</CardGroup>
+
+This flexibility allows you to accurately represent real-world compatibility scenarios where parts may fit multiple vehicle models.
+
+## Viewing Vehicle Associations
+
+To see which vehicles are linked to a part:
+
+<Steps>
+  <Step title="Select a Part">
+    From the parts list, click on the part you want to view.
+  </Step>
+  
+  <Step title="Access Part Details">
+    Click the "Alterar" (Update) link to open the part edit view.
+  </Step>
+  
+  <Step title="View Relationships">
+    Scroll down to the "Relacionamento com veículos" (Relationship with vehicles) section to see all linked vehicles.
+  </Step>
+</Steps>
+
+The relationship section displays:
+- A list of currently associated vehicles
+- An option to add new vehicle associations
+- The ability to remove existing associations
+
+## Linking Parts to Vehicles
+
+To create a new part-vehicle association:
+
+<Steps>
+  <Step title="Access Part Edit View">
+    Navigate to the part details and click "Alterar" (Update) to enter edit mode.
+  </Step>
+  
+  <Step title="Select a Vehicle">
+    In the "Relacionamento com veículos" section, use the dropdown menu to select a vehicle from the list of available vehicles.
+  </Step>
+  
+  <Step title="Create Association">
+    Click the "Relacionar veículo" (Link vehicle) button to create the association.
+  </Step>
+  
+  <Step title="Confirm Success">
+    The vehicle will immediately appear in the list of related vehicles for that part.
+  </Step>
+</Steps>
+
+<Info>
+  The dropdown only shows vehicles that exist in your vehicles database. Make sure to create vehicles first if they don't appear in the list.
+</Info>
+
+## Removing Vehicle Associations
+
+To unlink a vehicle from a part:
+
+<Steps>
+  <Step title="Locate the Association">
+    In the part edit view, find the vehicle you want to unlink in the "Relacionamento com veículos" list.
+  </Step>
+  
+  <Step title="Click Unlink">
+    Click the "Desvincular" (Unlink) button next to the vehicle name.
+  </Step>
+  
+  <Step title="Confirm Removal">
+    The vehicle will be removed from the associated vehicles list immediately.
+  </Step>
+</Steps>
+
+<Note>
+  Unlinking a vehicle from a part doesn't delete the vehicle from your database - it only removes the association between that specific part and vehicle.
+</Note>
+
+## Use Cases and Benefits
+
+Part-vehicle relationships provide significant value across multiple business scenarios:
+
+### Improved Search Functionality
+
+Customers can search for parts by vehicle name, making it easy to find all compatible parts for their specific vehicle model. This is especially useful when:
+
+- A customer knows their vehicle but not the specific part name
+- You want to display all available parts for a particular vehicle
+- Creating vehicle-specific catalogs or recommendations
+
+### Better Inventory Organization
+
+Relationships help organize your inventory logically:
+
+- Group parts by vehicle compatibility
+- Identify gaps in your catalog (vehicles with few associated parts)
+- Plan inventory based on popular vehicle models
+
+### Enhanced Customer Experience
+
+<CardGroup cols={2}>
+  <Card title="Faster Part Lookup" icon="magnifying-glass">
+    Customers can quickly find compatible parts by searching for their vehicle, reducing time spent browsing.
+  </Card>
+  
+  <Card title="Reduced Errors" icon="circle-check">
+    Clear vehicle associations help prevent ordering incorrect parts, improving customer satisfaction.
+  </Card>
+  
+  <Card title="Cross-Selling Opportunities" icon="tags">
+    When viewing a vehicle's compatible parts, customers may discover additional parts they need.
+  </Card>
+  
+  <Card title="Trust and Confidence" icon="shield-check">
+    Explicit compatibility information builds customer confidence in their purchase decisions.
+  </Card>
+</CardGroup>
+
+### Catalog Management Benefits
+
+- **Data Accuracy**: Maintain accurate compatibility information in one centralized system
+- **Easy Updates**: When vehicle compatibility changes, update relationships without modifying part data
+- **Scalability**: Add new vehicles and link them to existing parts without data duplication
+
+## Complete Workflow Example
+
+Here's a complete workflow for managing part-vehicle relationships:
+
+<Steps>
+  <Step title="Set Up Vehicles">
+    First, create all the vehicles in your database. For example:
+    - Fusca
+    - Golf GTI  
+    - Civic
+    - Corolla
+  </Step>
+  
+  <Step title="Create the Part">
+    Add a new part to your catalog with all required details:
+    - Name: "Universal Oil Filter"
+    - Net Weight: 0.35
+    - Gross Weight: 0.42
+  </Step>
+  
+  <Step title="Link Compatible Vehicles">
+    Open the part for editing and link all compatible vehicles:
+    - Select "Fusca" from dropdown → Click "Relacionar veículo"
+    - Select "Golf GTI" from dropdown → Click "Relacionar veículo"
+    - Select "Civic" from dropdown → Click "Relacionar veículo"
+  </Step>
+  
+  <Step title="Verify Associations">
+    Confirm that all three vehicles now appear in the related vehicles list for the Universal Oil Filter.
+  </Step>
+  
+  <Step title="Test Search Functionality">
+    Go to the parts list and search for "Civic" in the vehicle search field. The Universal Oil Filter should appear in the results.
+  </Step>
+</Steps>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Build Vehicle Database First">
+    Create your complete vehicle database before starting to link parts. This prevents interruptions in your workflow and ensures all vehicles are available when you need them.
+  </Accordion>
+  
+  <Accordion title="Verify Compatibility">
+    Always verify actual vehicle compatibility before creating associations. Incorrect relationships can lead to customer dissatisfaction and returns.
+  </Accordion>
+  
+  <Accordion title="Regular Audits">
+    Periodically review part-vehicle relationships to ensure they remain accurate, especially when:
+    - New vehicle models are released
+    - Part specifications change
+    - You receive customer feedback about compatibility
+  </Accordion>
+  
+  <Accordion title="Batch Processing">
+    When adding multiple parts that share the same vehicle compatibility (e.g., a new line of filters), document the common vehicles to streamline the linking process.
+  </Accordion>
+  
+  <Accordion title="Document Exceptions">
+    If a part is compatible with most versions of a vehicle but not all (e.g., "Golf GTI 2015+ only"), include this information in the part's application vehicle field for clarity.
+  </Accordion>
+</AccordionGroup>
+
+## API Integration
+
+The relationship system is supported by dedicated API endpoints:
+
+| Endpoint | Method | Purpose |
+|----------|--------|----------|
+| `/parts/:partId/vehicles` | GET | List all vehicles related to a part |
+| `/parts/:partId/vehicles/:vehicleId` | POST | Link a vehicle to a part |
+| `/parts/:partId/vehicles/:vehicleId` | DELETE | Remove vehicle-part relationship |
+
+These endpoints enable integration with external systems and automation of relationship management.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Vehicle Not Appearing in Dropdown">
+    If a vehicle doesn't appear in the selection dropdown:
+    - Verify the vehicle exists in your vehicles database
+    - Refresh the page to ensure the latest vehicle data is loaded
+    - Check that the vehicle hasn't been deleted
+  </Accordion>
+  
+  <Accordion title="Cannot Link Vehicle">
+    If you cannot create a vehicle association:
+    - Ensure you've selected a vehicle from the dropdown
+    - Check that the same vehicle isn't already linked to the part
+    - Verify your connection to the backend API
+  </Accordion>
+  
+  <Accordion title="Search Not Returning Expected Results">
+    If searching by vehicle doesn't show a part:
+    - Verify the part-vehicle relationship exists in the database
+    - Check your search term spelling
+    - Remember that the search performs partial matching
+  </Accordion>
+</AccordionGroup>

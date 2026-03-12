@@ -1,0 +1,442 @@
+---
+title: Testing
+description: Unit testing with JUnit 5 and H2 in-memory database
+---
+
+## Overview
+
+The Parts Catalog backend uses **JUnit 5** for unit testing with Spring Boot Test framework. Tests run against an **H2 in-memory database** to ensure fast execution without affecting the production PostgreSQL database.
+
+## Testing Stack
+
+- **JUnit 5** - Testing framework
+- **Spring Boot Test** - Spring-specific testing utilities
+- **H2 Database** - In-memory database for tests
+- **MockMvc** - REST controller testing
+- **Mockito** - Mocking framework
+- **AssertJ** - Fluent assertions
+
+## H2 In-Memory Database
+
+H2 is configured as a test dependency in `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+    <scope>test</scope>
+</dependency>
+```
+
+### Benefits of H2 for Testing
+
+- **Fast** - In-memory database provides quick test execution
+- **Isolated** - Each test run starts with a clean database
+- **No Setup Required** - H2 is automatically configured by Spring Boot
+- **PostgreSQL Compatible** - Supports similar SQL syntax
+
+<Note>
+  Spring Boot automatically uses H2 when it's on the test classpath, replacing the PostgreSQL configuration during tests.
+</Note>
+
+## Test Structure
+
+Tests are located in `src/test/java` and mirror the main source structure:
+
+```
+src/test/java/
+└── br/com/tarcnux/spring/jpa/postgresql/
+    ├── JPAUnitTest.java           # Repository/JPA tests
+    └── PartControllerTest.java    # Controller/API tests
+```
+
+## Running Tests
+
+<CodeGroup>
+
+```bash Spring Tools Suite (STS)
+# In Spring Tools Suite:
+# 1. Right-click on src/test/java
+# 2. Select "Run As" → "JUnit Test"
+```
+
+```bash Maven Command Line
+# Run all tests
+mvn test
+
+# Run tests with verbose output
+mvn test -X
+
+# Run a specific test class
+mvn test -Dtest=JPAUnitTest
+
+# Run tests and generate coverage report
+mvn clean test
+```
+
+```bash Maven Wrapper
+# If using Maven wrapper
+./mvnw test
+```
+
+</CodeGroup>
+
+<Tip>
+  If you encounter JUnit errors in STS, add JUnit 5 to the build path: Right-click project → Build Path → Add Libraries → JUnit → Select JUnit 5
+</Tip>
+
+## JPA Repository Tests
+
+The `JPAUnitTest` class tests repository operations using `@DataJpaTest`:
+
+```java JPAUnitTest.java
+package br.com.tarcnux.spring.jpa.postgresql;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import br.com.tarcnux.spring.jpa.postgresql.model.Part;
+import br.com.tarcnux.spring.jpa.postgresql.repository.PartRepository;
+
+@RunWith(SpringRunner.class)
+@DataJpaTest
+public class JPAUnitTest {
+
+    @Autowired
+    private TestEntityManager entityManager;
+
+    @Autowired
+    private PartRepository repository;
+    
+    @Test
+    public void should_find_no_parts_if_repository_is_empty() {
+        Iterable<Part> parts = repository.findAll();
+        assertThat(parts).isEmpty();
+    }
+    
+    @Test
+    public void should_store_a_part() {
+        Part part = repository.save(
+            new Part("Impulsor de Partida", "Palio", 5.67, 6.54)
+        );
+        
+        assertThat(part).hasFieldOrPropertyWithValue("name", "Impulsor de Partida");
+        assertThat(part).hasFieldOrPropertyWithValue("applicationVehicle", "Palio");
+        assertThat(part).hasFieldOrPropertyWithValue("netWeight", 5.67);
+        assertThat(part).hasFieldOrPropertyWithValue("grossWeight", 6.54);
+    }
+    
+    @Test
+    public void should_find_part_by_name_containing_string() {
+        Part part1 = new Part("Impulsor de Partida", "Palio", 5.67, 6.54);
+        entityManager.persist(part1);
+        
+        Part part2 = new Part("Polia Rígida", "Celta", 4.56, 5.43);
+        entityManager.persist(part2);
+        
+        Part part3 = new Part("Polia Roda Livre", "Marea", 9.87, 10.98);
+        entityManager.persist(part3);
+        
+        Iterable<Part> parts = 
+            repository.findByNameContainingIgnoreCaseOrderByNameAsc("Polia");
+        assertThat(parts).hasSize(2).contains(part2, part3);
+    }
+    
+    @Test
+    public void should_update_part_by_id() {
+        Part part = new Part("Polia Roda Livre", "Marea", 9.87, 10.98);
+        entityManager.persist(part);
+        
+        Part updatedPart = repository.findById(part.getId()).get();
+        updatedPart.setName("Updated Polia Roda Livre");
+        updatedPart.setNetWeight(19.87);
+        repository.save(updatedPart);
+        
+        Part checkPart = repository.findById(part.getId()).get();
+        assertThat(checkPart.getName()).isEqualTo("Updated Polia Roda Livre");
+        assertThat(checkPart.getNetWeight()).isEqualTo(19.87);
+    }
+    
+    @Test
+    public void should_delete_part_by_id() {
+        Part part1 = new Part("Impulsor de Partida", "Palio", 5.67, 6.54);
+        entityManager.persist(part1);
+        
+        Part part2 = new Part("Polia Rígida", "Celta", 4.56, 5.43);
+        entityManager.persist(part2);
+        
+        repository.deleteById(part2.getId());
+        
+        Iterable<Part> parts = repository.findAll();
+        assertThat(parts).hasSize(1).contains(part1);
+    }
+}
+```
+
+### @DataJpaTest Annotation
+
+The `@DataJpaTest` annotation provides:
+
+- Configures H2 in-memory database
+- Configures Spring Data JPA
+- Configures Hibernate
+- Enables transaction rollback after each test
+- Provides `TestEntityManager` for test data setup
+
+<Accordion title="TestEntityManager vs Repository">
+  **TestEntityManager** is used for setting up test data (with `persist()`), while the **Repository** is the subject under test. This ensures you're testing the repository methods, not the EntityManager.
+</Accordion>
+
+## Controller Tests
+
+The `PartControllerTest` class tests REST API endpoints using `@WebMvcTest`:
+
+```java PartControllerTest.java
+package br.com.tarcnux.spring.jpa.postgresql;
+
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.Arrays;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import br.com.tarcnux.spring.jpa.postgresql.controller.PartController;
+import br.com.tarcnux.spring.jpa.postgresql.model.Part;
+import br.com.tarcnux.spring.jpa.postgresql.repository.PartRepository;
+
+@WebMvcTest(PartController.class)
+class PartControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private PartRepository partRepository;
+
+    @Test
+    void should_prioritize_vehicle_filter_when_name_and_vehicle_are_informed() 
+            throws Exception {
+        Part part1 = new Part("Polia Rígida", "Marea", 4.56, 5.43);
+        Part part2 = new Part("Polia Roda Livre", "Marea", 9.87, 10.98);
+
+        when(partRepository
+            .findByApplicationVehicleContainingIgnoreCaseOrderByNameAsc("Mar"))
+            .thenReturn(Arrays.asList(part1, part2));
+
+        mockMvc.perform(
+            get("/api/v1/parts")
+                .param("name", "Polia")
+                .param("vehicle", "Mar")
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(2)))
+        .andExpect(jsonPath("$[0].applicationVehicle").value("Marea"))
+        .andExpect(jsonPath("$[1].applicationVehicle").value("Marea"));
+
+        verify(partRepository)
+            .findByApplicationVehicleContainingIgnoreCaseOrderByNameAsc("Mar");
+        verify(partRepository, never())
+            .findByNameContainingIgnoreCaseOrderByNameAsc(anyString());
+    }
+}
+```
+
+### @WebMvcTest Annotation
+
+The `@WebMvcTest` annotation:
+
+- Loads only the web layer (controllers)
+- Auto-configures `MockMvc` for testing HTTP requests
+- Does not load the full application context
+- Requires mocking of dependencies with `@MockBean`
+
+### MockMvc Testing Pattern
+
+```java
+mockMvc.perform(get("/api/v1/parts").param("name", "Polia"))
+    .andExpect(status().isOk())
+    .andExpect(jsonPath("$[0].name").value("Polia Rígida"));
+```
+
+- **`perform()`** - Executes an HTTP request
+- **`andExpect()`** - Asserts expected results
+- **`jsonPath()`** - Queries JSON response using JsonPath expressions
+
+## Test Coverage
+
+The test suite covers:
+
+### Repository Operations (9 tests)
+
+1. Find all parts when repository is empty
+2. Store a new part
+3. Find all parts
+4. Find part by ID
+5. Find parts by name containing string
+6. Find parts by vehicle containing string
+7. Update part by ID
+8. Delete part by ID
+9. Delete all parts
+
+### Controller Operations (1 test)
+
+1. Test query parameter priority (vehicle filter over name filter)
+
+<Note>
+  All tests use descriptive names following the pattern `should_[action]_[condition]` to make test intent clear.
+</Note>
+
+## Writing New Tests
+
+### JPA Repository Test Template
+
+```java
+@Test
+public void should_[describe_expected_behavior]() {
+    // Arrange: Set up test data
+    Part part = new Part("Test Part", "Test Vehicle", 1.0, 2.0);
+    entityManager.persist(part);
+    
+    // Act: Execute the operation
+    List<Part> result = repository.findByNameContainingIgnoreCaseOrderByNameAsc("Test");
+    
+    // Assert: Verify the result
+    assertThat(result).hasSize(1);
+    assertThat(result.get(0).getName()).isEqualTo("Test Part");
+}
+```
+
+### Controller Test Template
+
+```java
+@Test
+void should_[describe_expected_behavior]() throws Exception {
+    // Arrange: Mock repository behavior
+    Part part = new Part("Test Part", "Test Vehicle", 1.0, 2.0);
+    when(partRepository.findById(1L)).thenReturn(Optional.of(part));
+    
+    // Act & Assert: Perform request and verify response
+    mockMvc.perform(get("/api/v1/parts/1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.name").value("Test Part"));
+}
+```
+
+## Test Execution Results
+
+When all tests pass, you'll see output similar to:
+
+```
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running br.com.tarcnux.spring.jpa.postgresql.JPAUnitTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Running br.com.tarcnux.spring.jpa.postgresql.PartControllerTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] BUILD SUCCESS
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Descriptive Test Names">
+    Name tests to describe behavior, not implementation:
+    
+    ✅ `should_find_part_by_name_containing_string`
+    
+    ❌ `testFindByName`
+  </Accordion>
+
+  <Accordion title="Follow Arrange-Act-Assert Pattern">
+    Structure tests in three clear sections:
+    
+    1. **Arrange** - Set up test data and mocks
+    2. **Act** - Execute the operation
+    3. **Assert** - Verify the results
+  </Accordion>
+
+  <Accordion title="Keep Tests Independent">
+    Each test should:
+    - Run independently of other tests
+    - Not depend on execution order
+    - Clean up after itself (handled automatically by `@DataJpaTest`)
+  </Accordion>
+
+  <Accordion title="Test Business Logic, Not Framework">
+    Focus on testing:
+    - Custom query methods
+    - Business logic in controllers
+    - Data validation
+    - Edge cases and error conditions
+    
+    Don't test:
+    - Standard CRUD operations provided by JpaRepository
+    - Spring framework behavior
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="JUnit Not Found Error in STS">
+    If you see JUnit errors in Spring Tools Suite:
+    
+    1. Right-click on the project
+    2. Select **Build Path → Add Libraries**
+    3. Choose **JUnit**
+    4. Select **JUnit 5**
+    5. Click **Finish**
+  </Accordion>
+
+  <Accordion title="H2 Database Conflicts">
+    If tests fail due to H2 configuration issues:
+    
+    - Ensure H2 dependency has `<scope>test</scope>` in `pom.xml`
+    - Check that no `application.properties` exists in `src/test/resources`
+    - Verify tests use `@DataJpaTest` or `@SpringBootTest` annotations
+  </Accordion>
+
+  <Accordion title="Test Data Not Persisting">
+    Remember that `@DataJpaTest` automatically rolls back transactions after each test. This is intentional to keep tests isolated. If you need to verify persistence:
+    
+    ```java
+    @Test
+    public void testPersistence() {
+        Part part = new Part("Test", "Vehicle", 1.0, 2.0);
+        Part saved = repository.save(part);
+        entityManager.flush(); // Force write to database
+        entityManager.clear(); // Clear persistence context
+        
+        Part found = repository.findById(saved.getId()).get();
+        assertThat(found).isNotNull();
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Backend Setup" icon="server" href="/backend/setup">
+    Return to backend setup and running instructions
+  </Card>
+  <Card title="Database Configuration" icon="database" href="/backend/database">
+    Learn more about the database schema and entities
+  </Card>
+</CardGroup>

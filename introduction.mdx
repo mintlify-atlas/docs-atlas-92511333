@@ -1,0 +1,94 @@
+---
+title: Introduction
+description: Learn about Parts Catalog, a full-stack CRUD application for managing automotive parts and vehicles
+---
+
+# Introduction
+
+Parts Catalog is a comprehensive web application designed to manage and control a catalog of automotive parts sold by a company. Built with modern technologies, it provides a complete solution for cataloging parts, managing vehicles, and establishing relationships between them.
+
+## What is Parts Catalog?
+
+Parts Catalog is a full-stack CRUD application that allows you to:
+
+- Create, list, update, and delete parts from your catalog
+- Manage vehicle information
+- Establish many-to-many relationships between parts and vehicles
+- Search and filter parts by name or vehicle application
+- Maintain detailed part specifications including weight information
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Parts Management" icon="gear">
+    Create and manage parts with detailed information including name, application vehicle, net weight, and gross weight. Search by keyword in name or vehicle.
+  </Card>
+  
+  <Card title="Vehicle Management" icon="car">
+    Maintain a comprehensive database of vehicles and establish relationships with compatible parts.
+  </Card>
+  
+  <Card title="Advanced Relationships" icon="link">
+    Create many-to-many relationships between parts and vehicles. One part can be compatible with multiple vehicles, and vice versa.
+  </Card>
+  
+  <Card title="RESTful API" icon="code">
+    Fully documented REST API with Swagger integration for easy testing and integration.
+  </Card>
+</CardGroup>
+
+## Architecture Overview
+
+Parts Catalog is built with a modern, scalable architecture:
+
+### Backend
+
+- **Java 11** - Programming language
+- **Spring Boot 2.4.3** - Application framework
+- **Spring Web MVC** - REST Controller implementation
+- **Spring Data JPA** - Database interaction layer
+- **PostgreSQL** - Primary database for production
+- **H2 Database** - In-memory database for unit testing
+- **JUnit 5** - Unit testing framework
+- **Maven** - Dependency management
+- **Swagger** - API documentation and testing interface
+
+### Frontend
+
+- **Vue.js 2.6.11** - Progressive JavaScript framework
+- **Vue Router 3.5.1** - Client-side routing
+- **Axios 0.21.1** - HTTP client for API communication
+- **Bootstrap** - Responsive UI components
+
+### Database
+
+The application uses PostgreSQL as its primary database with the following structure:
+
+- **Parts Table** - Stores part information (name, application vehicle, weights)
+- **Vehicles Table** - Stores vehicle information
+- **Many-to-Many Relationship** - Links parts to their compatible vehicles
+
+## API Capabilities
+
+The REST API provides comprehensive endpoints for:
+
+- **CRUD operations** for parts and vehicles
+- **Search functionality** by part name or vehicle keyword
+- **Relationship management** between parts and vehicles
+- **Bulk operations** including delete all functionality
+- **Alphabetical sorting** for organized data retrieval
+
+## Getting Started
+
+Ready to get started with Parts Catalog? Check out our [Quick Start guide](/quickstart) to set up your local development environment and run the application in minutes.
+
+## Technology Stack Summary
+
+| Layer | Technology | Version |
+|-------|-----------|----------|
+| Backend Framework | Spring Boot | 2.4.3 |
+| Language | Java | 11 |
+| Frontend Framework | Vue.js | 2.6.11 |
+| Database | PostgreSQL | Latest |
+| Testing | JUnit | 5 |
+| API Documentation | Swagger | 2.9.2 |

@@ -1,0 +1,172 @@
+---
+title: Frontend Setup
+description: Setting up and running the Vue.js frontend application
+---
+
+The Parts Catalog frontend is built with Vue.js 2.6.11 and provides an interactive interface for managing parts and vehicles.
+
+## Prerequisites
+
+Before getting started, ensure you have the following installed:
+
+- **Node.js**: Version 10 or higher
+- **npm**: Comes with Node.js installation
+- **Backend API**: The Spring Boot backend must be running on `http://localhost:8080`
+
+## Installation
+
+<Steps>
+  <Step title="Navigate to frontend directory">
+    ```bash
+    cd frontend
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    <CodeGroup>
+      ```bash npm
+      npm install
+      ```
+
+      ```bash yarn
+      yarn install
+      ```
+    </CodeGroup>
+
+    <Note>
+      On Linux, you may need to use `sudo npm install` if you encounter permission issues.
+    </Note>
+  </Step>
+
+  <Step title="Start development server">
+    <CodeGroup>
+      ```bash npm
+      npm run serve
+      ```
+
+      ```bash yarn
+      yarn serve
+      ```
+    </CodeGroup>
+
+    The application will be available at `http://localhost:8081`
+  </Step>
+</Steps>
+
+## Tech Stack
+
+The frontend is built with the following technologies:
+
+| Technology | Version | Purpose |
+|------------|---------|----------|
+| Vue.js | 2.6.11 | Progressive JavaScript framework |
+| Vue Router | 3.5.1 | Client-side routing |
+| Axios | 0.21.1 | HTTP client for API requests |
+| Bootstrap | Latest | CSS framework for styling |
+
+## Development Scripts
+
+The following npm scripts are available:
+
+<CodeGroup>
+  ```bash Development Server
+  npm run serve
+  ```
+
+  ```bash Production Build
+  npm run build
+  ```
+
+  ```bash Linting
+  npm run lint
+  ```
+</CodeGroup>
+
+## Environment Configuration
+
+The frontend connects to the backend API through the Axios configuration located in `src/http-common.js`:
+
+```javascript
+import axios from "axios";
+
+export default axios.create({
+  baseURL: "http://localhost:8080/api/v1",
+  headers: {
+    "Content-type": "application/json"
+  }
+});
+```
+
+<Warning>
+  If your backend is running on a different port or host, update the `baseURL` in `src/http-common.js`.
+</Warning>
+
+## Building for Production
+
+To create an optimized production build:
+
+<Steps>
+  <Step title="Run the build command">
+    ```bash
+    npm run build
+    ```
+  </Step>
+
+  <Step title="Deploy the dist folder">
+    The production-ready files will be generated in the `dist/` directory. Deploy this folder to your web server.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="npm run serve fails">
+    Try the following steps:
+    
+    1. Remove `node_modules` and `package-lock.json`:
+       ```bash
+       rm -rf node_modules package-lock.json
+       ```
+    
+    2. Clear npm cache:
+       ```bash
+       npm cache verify
+       ```
+    
+    3. Update global npm:
+       ```bash
+       sudo npm i -g npm
+       ```
+    
+    4. Reinstall dependencies:
+       ```bash
+       npm install
+       ```
+  </Accordion>
+
+  <Accordion title="Cannot connect to backend">
+    Ensure that:
+    - The Spring Boot backend is running on `http://localhost:8080`
+    - The database is properly configured
+    - No firewall is blocking the connection
+    - CORS is properly configured in the backend
+  </Accordion>
+
+  <Accordion title="Port 8081 is already in use">
+    You can specify a different port:
+    ```bash
+    npm run serve -- --port 8082
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Vue Components" icon="puzzle-piece" href="/frontend/components">
+    Learn about the component architecture
+  </Card>
+  <Card title="Routing" icon="route" href="/frontend/routing">
+    Understand the routing structure
+  </Card>
+</CardGroup>

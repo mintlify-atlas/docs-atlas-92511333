@@ -1,0 +1,179 @@
+---
+title: Parts Management
+description: Manage your auto parts inventory with comprehensive CRUD operations
+---
+
+The Parts Management feature provides a complete interface for managing your auto parts catalog. You can create, view, search, update, and delete parts with built-in validation to ensure data integrity.
+
+## Overview
+
+The parts management system allows you to:
+
+- Add new parts to your inventory
+- View all parts in alphabetical order
+- Search parts by name or vehicle application
+- Update existing part information
+- Delete individual parts or clear the entire catalog
+- Validate weight specifications
+
+## Creating New Parts
+
+To add a new part to your catalog:
+
+<Steps>
+  <Step title="Navigate to Add Part">
+    Click on the "Add Part" option in the navigation menu to access the part creation form.
+  </Step>
+  
+  <Step title="Enter Part Details">
+    Fill in the required fields:
+    - **Name** (required): The part name, up to 200 characters
+    - **Net Weight** (required): The net weight in decimal format (e.g., 9.87)
+    - **Gross Weight** (required): The gross weight in decimal format (e.g., 10.98)
+    - **Application Vehicle** (optional): The vehicle this part is designed for
+  </Step>
+  
+  <Step title="Submit the Form">
+    Click the "Cadastrar" (Register) button to create the part. If successful, you'll see a confirmation message.
+  </Step>
+</Steps>
+
+<Note>
+  Weight values support up to 2 decimal places. The system validates that net weight does not exceed gross weight.
+</Note>
+
+## Viewing Parts List
+
+The parts list displays all parts in your catalog in alphabetical order by name. Each part entry shows:
+
+- Part name
+- Quick access to delete the part
+- Click any part to view its details
+
+When you select a part from the list, the details panel displays:
+- Name
+- Application vehicle
+- Net weight
+- Gross weight
+- Link to edit the part
+
+## Searching Parts
+
+### Search by Name
+
+To find parts by name:
+
+<Steps>
+  <Step title="Enter Search Term">
+    Type a keyword in the "Buscar por nome" (Search by name) field.
+  </Step>
+  
+  <Step title="Execute Search">
+    Click the "Buscar" (Search) button to filter the parts list.
+  </Step>
+</Steps>
+
+The system performs a partial match search, returning all parts whose names contain the keyword.
+
+### Search by Vehicle Application
+
+To find parts compatible with a specific vehicle:
+
+<Steps>
+  <Step title="Enter Vehicle Name">
+    Type the vehicle name or keyword in the "Buscar por veículo de aplicação" (Search by application vehicle) field.
+  </Step>
+  
+  <Step title="Execute Search">
+    Click the "Buscar" (Search) button to filter parts by vehicle compatibility.
+  </Step>
+</Steps>
+
+## Updating Part Details
+
+To modify an existing part:
+
+<Steps>
+  <Step title="Select the Part">
+    Click on the part you want to update from the parts list.
+  </Step>
+  
+  <Step title="Access Edit Mode">
+    Click the "Alterar" (Update) badge in the part details panel.
+  </Step>
+  
+  <Step title="Modify Information">
+    Update any of the part fields as needed. All fields can be edited except the part ID.
+  </Step>
+  
+  <Step title="Save Changes">
+    Click the "Atualizar" (Update) button to save your changes. You'll be redirected to the parts list upon success.
+  </Step>
+</Steps>
+
+<Warning>
+  The same validation rules apply when updating: net weight must be less than or equal to gross weight, and name, net weight, and gross weight are required fields.
+</Warning>
+
+## Deleting Parts
+
+### Delete Individual Part
+
+You can delete a single part in two ways:
+
+1. **From the parts list**: Click the "Apagar" (Delete) button next to the part name
+2. **From the edit view**: Click the "Apagar" (Delete) button while editing the part
+
+### Delete All Parts
+
+To clear your entire parts catalog:
+
+<Steps>
+  <Step title="Locate Delete All Button">
+    On the parts list page, find the "Apagar todas as peças" (Delete all parts) button below the parts list.
+  </Step>
+  
+  <Step title="Confirm Deletion">
+    Click the button to remove all parts from the catalog. The list will refresh to show an empty state.
+  </Step>
+</Steps>
+
+<Warning>
+  Deleting all parts is a permanent action and cannot be undone. Make sure you have backups if needed.
+</Warning>
+
+## Validation Rules
+
+The system enforces the following validation rules to maintain data integrity:
+
+| Field | Rule |
+|-------|------|
+| Name | Required, maximum 200 characters |
+| Net Weight | Required, must be a decimal number, must be ≤ gross weight |
+| Gross Weight | Required, must be a decimal number, must be ≥ net weight |
+| Application Vehicle | Optional, maximum 200 characters |
+
+### Error Messages
+
+If validation fails, you'll see error messages explaining the issues:
+
+- "O peso líquido não pode ser maior que o peso bruto" - Net weight cannot exceed gross weight
+- "Não é possível cadastrar peça sem nome" - Cannot register part without a name
+- "Não é possível cadastrar peça sem peso líquido" - Cannot register part without net weight
+- "Não é possível cadastrar peça sem peso bruto" - Cannot register part without gross weight
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Naming Conventions">
+    Use clear, descriptive names for parts to make searching easier. Include part numbers or model codes if applicable.
+  </Accordion>
+  
+  <Accordion title="Weight Specifications">
+    Always verify weight measurements before entering them. Remember that net weight should account for the part only, while gross weight includes packaging.
+  </Accordion>
+  
+  <Accordion title="Vehicle Applications">
+    While optional, filling in the vehicle application field improves searchability and helps users find compatible parts quickly.
+  </Accordion>
+</AccordionGroup>

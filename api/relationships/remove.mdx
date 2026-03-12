@@ -1,0 +1,208 @@
+---
+title: "Remove Vehicle from Part"
+api: "DELETE /api/v1/parts/{partId}/vehicles/{vehicleId}"
+description: "Remove a relationship between a part and a vehicle"
+---
+
+## Overview
+
+This endpoint removes the many-to-many relationship between a part and a vehicle. It unlinks the specified vehicle from the specified part, indicating that the part is no longer associated with that vehicle.
+
+## Endpoint
+
+```
+DELETE /api/v1/parts/{partId}/vehicles/{vehicleId}
+```
+
+## Path Parameters
+
+<ParamField path="partId" type="Long" required>
+  The unique identifier of the part from which you want to remove a vehicle relationship
+</ParamField>
+
+<ParamField path="vehicleId" type="Long" required>
+  The unique identifier of the vehicle to disassociate from the part
+</ParamField>
+
+## Request
+
+No request body is required. The relationship is removed using only the path parameters.
+
+## Response
+
+Returns the updated `Part` object with its remaining set of associated vehicles, excluding the removed one.
+
+### Response Structure
+
+```json
+{
+  "id": 1,
+  "name": "Polia",
+  "applicationVehicle": "Fusca",
+  "netWeight": 9.87,
+  "grossWeight": 10.98,
+  "vehicles": [
+    {
+      "id": 1,
+      "name": "Fusca",
+      "manufacturer": "Volkswagen",
+      "year": 1970
+    }
+  ]
+}
+```
+
+### Success Response
+
+<ResponseField name="200 OK" type="Part">
+  Successfully removed the relationship. Returns the updated part with remaining associated vehicles.
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404 NOT_FOUND" type="Error">
+  Either the specified part ID or vehicle ID does not exist in the database.
+</ResponseField>
+
+## Controller Implementation
+
+The endpoint is implemented in the `PartController` class:
+
+```java
+@DeleteMapping("/parts/{partId}/vehicles/{vehicleId}")
+@ApiOperation(value = "Remove o relacionamento entre veículo e peça")
+@ResponseStatus(HttpStatus.OK)
+public ResponseEntity<Part> removeVehicleFromPart(
+        @PathVariable("partId") Long partId,
+        @PathVariable("vehicleId") Long vehicleId) {
+    Optional<Part> partData = partRepository.findById(partId);
+    Optional<Vehicle> vehicleData = vehicleRepository.findById(vehicleId);
+
+    if (!partData.isPresent() || !vehicleData.isPresent()) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    Part part = partData.get();
+    part.removeVehicle(vehicleData.get());
+    return new ResponseEntity<>(partRepository.save(part), HttpStatus.OK);
+}
+```
+
+Reference: `~/workspace/source/backend/src/main/java/br/com/tarcnux/spring/jpa/postgresql/controller/PartController.java:171-186`
+
+## Bidirectional Relationship Cleanup
+
+The `removeVehicle` method in the `Part` model maintains bidirectional consistency:
+
+```java
+public void removeVehicle(Vehicle vehicle) {
+    this.vehicles.remove(vehicle);
+    vehicle.getParts().remove(this);
+}
+```
+
+Reference: `~/workspace/source/backend/src/main/java/br/com/tarcnux/spring/jpa/postgresql/model/Part.java:99-102`
+
+This ensures that:
+- The vehicle is removed from the part's vehicle set
+- The part is removed from the vehicle's part set
+- Both sides of the relationship are properly cleaned up
+- No orphaned relationships remain in the database
+
+## Example Usage
+
+### Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X DELETE "http://localhost:8080/api/v1/parts/1/vehicles/2" \
+  -H "Accept: application/json"
+```
+
+```javascript JavaScript
+fetch('http://localhost:8080/api/v1/parts/1/vehicles/2', {
+  method: 'DELETE',
+  headers: {
+    'Accept': 'application/json'
+  }
+})
+  .then(response => response.json())
+  .then(data => console.log(data));
+```
+
+```java Java
+RestTemplate restTemplate = new RestTemplate();
+String url = "http://localhost:8080/api/v1/parts/1/vehicles/2";
+restTemplate.delete(url);
+// To get the response:
+ResponseEntity<Part> response = restTemplate.exchange(
+    url,
+    HttpMethod.DELETE,
+    null,
+    Part.class
+);
+Part updatedPart = response.getBody();
+```
+
+```python Python
+import requests
+
+url = "http://localhost:8080/api/v1/parts/1/vehicles/2"
+response = requests.delete(url)
+updated_part = response.json()
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "id": 1,
+  "name": "Polia",
+  "applicationVehicle": "Fusca",
+  "netWeight": 9.87,
+  "grossWeight": 10.98,
+  "vehicles": [
+    {
+      "id": 1,
+      "name": "Fusca",
+      "manufacturer": "Volkswagen",
+      "year": 1970
+    }
+  ]
+}
+```
+
+## Use Cases
+
+- **Compatibility Update** - Remove outdated or incorrect vehicle associations
+- **Part Discontinuation** - Unlink parts that are no longer compatible with certain vehicles
+- **Data Correction** - Fix mistaken relationships in the catalog
+- **Inventory Management** - Update part-vehicle associations as products change
+
+## Important Notes
+
+<Note>
+  **Idempotent Operation**: If the relationship doesn't exist, the operation will complete without error. The part is saved regardless, ensuring database consistency.
+</Note>
+
+<Warning>
+  **Prerequisite**: Both the part and vehicle must exist in the database. If either ID is invalid, the endpoint returns `404 NOT_FOUND`.
+</Warning>
+
+<Info>
+  **Soft Relationship**: Removing a relationship does NOT delete the part or vehicle entities. It only removes the association between them. Both entities remain in their respective tables.
+</Info>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card title="List Relationships" icon="list" href="/api/relationships/list">
+    View remaining vehicles for this part
+  </Card>
+  <Card title="Add Relationship" icon="plus" href="/api/relationships/add">
+    Add a vehicle back to this part
+  </Card>
+</CardGroup>

@@ -1,0 +1,350 @@
+---
+title: Database Configuration
+description: PostgreSQL setup, schema design, and JPA entity configuration
+---
+
+## Overview
+
+The Parts Catalog uses PostgreSQL as the production database and leverages Spring Data JPA for object-relational mapping. The application manages two main entities: **Parts** and **Vehicles**, with a many-to-many relationship between them.
+
+## PostgreSQL Setup
+
+<Steps>
+  <Step title="Install PostgreSQL">
+    Download and install PostgreSQL from [postgresql.org](https://www.postgresql.org/download/).
+  </Step>
+
+  <Step title="Install pgAdmin (Recommended)">
+    Install [pgAdmin](https://www.pgadmin.org/) for easier database management through a graphical interface.
+  </Step>
+
+  <Step title="Create the Database">
+    1. Access pgAdmin at `http://127.0.0.1/pgadmin4/browser/`
+    2. Expand **Servers → Local**
+    3. Right-click on **Databases**
+    4. Select **Create → Database**
+    5. Enter database name: `partsCatalog`
+    6. Set owner: `postgres`
+    7. Click **Save**
+  </Step>
+
+  <Step title="Configure Credentials">
+    The default configuration uses:
+    - **Username:** `postgres`
+    - **Password:** `postgres`
+    - **Database:** `partsCatalog`
+    - **Port:** `5432`
+
+    If your setup differs, update `application.properties` accordingly.
+  </Step>
+</Steps>
+
+## Database Connection Configuration
+
+The database connection is configured in `src/main/resources/application.properties`:
+
+```properties
+# PostgreSQL Connection
+spring.datasource.url=jdbc:postgresql://localhost:5432/partsCatalog
+spring.datasource.username=postgres
+spring.datasource.password=postgres
+
+# Hibernate Configuration
+spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+# Schema Management
+spring.jpa.hibernate.ddl-auto=update
+
+spring.jpa.open-in-view=false
+```
+
+### Configuration Options
+
+- **`spring.jpa.hibernate.ddl-auto=update`** - Automatically updates the database schema when entity models change
+- **`spring.jpa.open-in-view=false`** - Disables Open Session in View pattern for better performance
+- **`hibernate.dialect`** - Specifies PostgreSQL-specific SQL dialect
+
+<Warning>
+  In production environments, consider using `validate` instead of `update` for `ddl-auto` to prevent automatic schema changes.
+</Warning>
+
+## Database Schema
+
+The application uses three tables:
+
+1. **`part`** - Stores part information
+2. **`vehicle`** - Stores vehicle information
+3. **`part_vehicle`** - Junction table for many-to-many relationship
+
+### Entity Relationship Diagram
+
+```
+┌─────────────────┐         ┌─────────────────┐         ┌─────────────────┐
+│      part       │         │  part_vehicle   │         │    vehicle      │
+├─────────────────┤         ├─────────────────┤         ├─────────────────┤
+│ id (PK)         │◄────────┤ part_id (FK)    │         │ id (PK)         │
+│ name            │         │ vehicle_id (FK) ├────────►│ name            │
+│ applicationVeh..│         └─────────────────┘         └─────────────────┘
+│ netWeight       │
+│ grossWeight     │
+└─────────────────┘
+
+        1                      N:M                             1
+```
+
+## Entity Models
+
+### Part Entity
+
+The `Part` entity represents automotive parts in the catalog:
+
+```java Part.java
+package br.com.tarcnux.spring.jpa.postgresql.model;
+
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.*;
+
+@Entity
+@Table(name = "part")
+public class Part {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "applicationVehicle")
+    private String applicationVehicle;
+
+    @Column(name = "netWeight")
+    private Double netWeight;
+
+    @Column(name = "grossWeight")
+    private Double grossWeight;
+
+    @ManyToMany
+    @JoinTable(
+        name = "part_vehicle",
+        joinColumns = @JoinColumn(name = "part_id"),
+        inverseJoinColumns = @JoinColumn(name = "vehicle_id")
+    )
+    private Set<Vehicle> vehicles = new HashSet<>();
+
+    // Constructors
+    public Part() {}
+
+    public Part(String name, String applicationVehicle, 
+                Double netWeight, Double grossWeight) {
+        this.name = name;
+        this.applicationVehicle = applicationVehicle;
+        this.netWeight = netWeight;
+        this.grossWeight = grossWeight;
+    }
+
+    // Methods for managing relationships
+    public void addVehicle(Vehicle vehicle) {
+        this.vehicles.add(vehicle);
+        vehicle.getParts().add(this);
+    }
+
+    public void removeVehicle(Vehicle vehicle) {
+        this.vehicles.remove(vehicle);
+        vehicle.getParts().remove(this);
+    }
+
+    // Getters and setters...
+}
+```
+
+#### Part Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | Long | Primary key (auto-generated) |
+| `name` | String | Part name |
+| `applicationVehicle` | String | Vehicle application description |
+| `netWeight` | Double | Net weight in kg |
+| `grossWeight` | Double | Gross weight in kg |
+| `vehicles` | Set&lt;Vehicle&gt; | Associated vehicles (many-to-many) |
+
+### Vehicle Entity
+
+The `Vehicle` entity represents vehicles that use specific parts:
+
+```java Vehicle.java
+package br.com.tarcnux.spring.jpa.postgresql.model;
+
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+@Entity
+@Table(name = "vehicle")
+public class Vehicle {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @Column(name = "name")
+    private String name;
+
+    @ManyToMany(mappedBy = "vehicles")
+    @JsonIgnore
+    private Set<Part> parts = new HashSet<>();
+
+    // Constructors
+    public Vehicle() {}
+
+    public Vehicle(String name) {
+        this.name = name;
+    }
+
+    // Getters and setters...
+}
+```
+
+#### Vehicle Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | Long | Primary key (auto-generated) |
+| `name` | String | Vehicle name/model |
+| `parts` | Set&lt;Part&gt; | Associated parts (many-to-many, inverse side) |
+
+<Note>
+  The `@JsonIgnore` annotation on the `parts` field prevents infinite recursion during JSON serialization.
+</Note>
+
+## JPA Annotations Explained
+
+### Entity Annotations
+
+- **`@Entity`** - Marks the class as a JPA entity
+- **`@Table(name = "...")`** - Specifies the database table name
+- **`@Id`** - Designates the primary key field
+- **`@GeneratedValue(strategy = GenerationType.AUTO)`** - Auto-generates primary key values
+- **`@Column(name = "...")`** - Maps field to database column
+
+### Relationship Annotations
+
+- **`@ManyToMany`** - Defines a many-to-many relationship
+- **`@JoinTable`** - Configures the junction table
+  - `name` - Name of the junction table
+  - `joinColumns` - Foreign key to the owning entity
+  - `inverseJoinColumns` - Foreign key to the inverse entity
+- **`@ManyToMany(mappedBy = "vehicles")`** - Indicates the inverse side of the relationship
+
+## Repository Interfaces
+
+### PartRepository
+
+The repository interface provides data access methods using Spring Data JPA:
+
+```java PartRepository.java
+package br.com.tarcnux.spring.jpa.postgresql.repository;
+
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import br.com.tarcnux.spring.jpa.postgresql.model.Part;
+
+public interface PartRepository extends JpaRepository<Part, Long> {
+    
+    List<Part> findByOrderByNameAsc();
+    
+    List<Part> findByNameContainingIgnoreCaseOrderByNameAsc(String name);
+    
+    List<Part> findByApplicationVehicleContainingIgnoreCaseOrderByNameAsc(String vehicle);
+}
+```
+
+### Custom Query Methods
+
+Spring Data JPA automatically implements these methods based on naming conventions:
+
+- **`findByOrderByNameAsc()`** - Retrieves all parts sorted alphabetically by name
+- **`findByNameContainingIgnoreCaseOrderByNameAsc(String name)`** - Searches parts by name (case-insensitive)
+- **`findByApplicationVehicleContainingIgnoreCaseOrderByNameAsc(String vehicle)`** - Searches parts by vehicle application
+
+<Tip>
+  Spring Data JPA query derivation eliminates the need to write SQL. Method names are parsed to generate queries automatically.
+</Tip>
+
+## Many-to-Many Relationship
+
+The relationship between parts and vehicles is bidirectional:
+
+### From Part to Vehicle
+
+```java
+Part part = partRepository.findById(1L).get();
+Set<Vehicle> vehicles = part.getVehicles();
+```
+
+### From Vehicle to Part
+
+```java
+Vehicle vehicle = vehicleRepository.findById(1L).get();
+Set<Part> parts = vehicle.getParts();
+```
+
+### Managing Relationships
+
+The `Part` entity provides helper methods to maintain bidirectional consistency:
+
+```java
+// Adding a relationship
+part.addVehicle(vehicle);
+partRepository.save(part);
+
+// Removing a relationship
+part.removeVehicle(vehicle);
+partRepository.save(part);
+```
+
+<Warning>
+  Always use the helper methods (`addVehicle()`, `removeVehicle()`) to ensure both sides of the relationship are updated correctly.
+</Warning>
+
+## Database Schema Management
+
+With `spring.jpa.hibernate.ddl-auto=update`, Hibernate automatically:
+
+1. Creates tables if they don't exist
+2. Adds new columns when entities are modified
+3. Updates column definitions when necessary
+4. Creates indexes and foreign key constraints
+
+### Schema Evolution Best Practices
+
+<Accordion title="Development Environment">
+  Use `update` to automatically apply schema changes during development.
+  
+  ```properties
+  spring.jpa.hibernate.ddl-auto=update
+  ```
+</Accordion>
+
+<Accordion title="Production Environment">
+  Use `validate` to ensure the schema matches entities without making changes. Use migration tools like Flyway or Liquibase for controlled schema updates.
+  
+  ```properties
+  spring.jpa.hibernate.ddl-auto=validate
+  ```
+</Accordion>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Backend Setup" icon="server" href="/backend/setup">
+    Return to backend setup and running instructions
+  </Card>
+  <Card title="Testing" icon="vial" href="/backend/testing">
+    Learn how to run tests with H2 in-memory database
+  </Card>
+</CardGroup>

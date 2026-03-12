@@ -1,0 +1,56 @@
+---
+title: 'Vehicles API Overview'
+description: 'Manage vehicle records in the Parts Catalog system'
+---
+
+## Introduction
+
+The Vehicles API provides endpoints for managing vehicle records in the Parts Catalog system. Vehicles can be created, retrieved, updated, and deleted, and can be associated with parts through the many-to-many relationship.
+
+Vehicles are returned in alphabetical order by name, and you can filter the list using a search parameter.
+
+## Base URL
+
+```
+http://localhost:8080/api/v1
+```
+
+## Available Endpoints
+
+<CardGroup cols={2}>
+  <Card title="Create Vehicle" icon="plus" href="/api/vehicles/create">
+    Create a new vehicle record
+  </Card>
+  
+  <Card title="Retrieve Vehicles" icon="list" href="/api/vehicles/retrieve">
+    Get all vehicles or a specific vehicle by ID
+  </Card>
+  
+  <Card title="Update Vehicle" icon="pen" href="/api/vehicles/update">
+    Update an existing vehicle
+  </Card>
+  
+  <Card title="Delete Vehicle" icon="trash" href="/api/vehicles/delete">
+    Delete a vehicle or all vehicles
+  </Card>
+</CardGroup>
+
+## Vehicle Model
+
+A vehicle object contains the following fields:
+
+<ResponseField name="id" type="long">
+  Unique identifier for the vehicle (auto-generated)
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  Name of the vehicle (e.g., "Fusca", "Gol", "Civic")
+</ResponseField>
+
+## Authentication
+
+Currently, the API does not require authentication. All endpoints are publicly accessible.
+
+## CORS Configuration
+
+The API accepts cross-origin requests from `http://localhost:8081`.

@@ -1,0 +1,189 @@
+---
+title: 'Delete Parts'
+description: 'Delete a specific part or all parts from the catalog'
+---
+
+## Delete Part by ID
+
+```
+DELETE http://localhost:8080/api/v1/parts/{id}
+```
+
+Deletes a specific part from the catalog by its unique identifier.
+
+### Path Parameters
+
+<ParamField path="id" type="long" required>
+  The unique identifier of the part to delete
+</ParamField>
+
+### Response
+
+Returns no content on successful deletion.
+
+### Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 204 No Content | Part was successfully deleted |
+| 500 Internal Server Error | An error occurred while deleting the part |
+
+### Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X DELETE http://localhost:8080/api/v1/parts/1
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:8080/api/v1/parts/1', {
+  method: 'DELETE'
+});
+
+if (response.status === 204) {
+  console.log('Part deleted successfully');
+}
+```
+
+```python Python
+import requests
+
+response = requests.delete('http://localhost:8080/api/v1/parts/1')
+
+if response.status_code == 204:
+    print('Part deleted successfully')
+```
+
+</CodeGroup>
+
+### Example Response
+
+```text 204 No Content
+(Empty response body)
+```
+
+### Controller Implementation
+
+```java PartController.java:119-129
+@DeleteMapping("/parts/{id}")
+@ApiOperation(value = "Exclui uma peça")
+@ResponseStatus(HttpStatus.NO_CONTENT)
+public ResponseEntity<HttpStatus> deletePart(@PathVariable("id") Long id) {
+    try {
+        partRepository.deleteById(id);
+        return new ResponseEntity<HttpStatus>(HttpStatus.NO_CONTENT);
+    } catch (Exception e) {
+        return new ResponseEntity<HttpStatus>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
+```
+
+---
+
+## Delete All Parts
+
+```
+DELETE http://localhost:8080/api/v1/parts
+```
+
+Deletes all parts from the catalog. Use with caution as this operation cannot be undone.
+
+<Warning>
+  This endpoint deletes ALL parts from the database. This operation is irreversible and should be used with extreme caution, typically only in development or testing environments.
+</Warning>
+
+### Response
+
+Returns no content on successful deletion.
+
+### Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 204 No Content | All parts were successfully deleted |
+| 500 Internal Server Error | An error occurred while deleting parts |
+
+### Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X DELETE http://localhost:8080/api/v1/parts
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:8080/api/v1/parts', {
+  method: 'DELETE'
+});
+
+if (response.status === 204) {
+  console.log('All parts deleted successfully');
+}
+```
+
+```python Python
+import requests
+
+response = requests.delete('http://localhost:8080/api/v1/parts')
+
+if response.status_code == 204:
+    print('All parts deleted successfully')
+```
+
+</CodeGroup>
+
+### Example Response
+
+```text 204 No Content
+(Empty response body)
+```
+
+### Controller Implementation
+
+```java PartController.java:131-141
+@DeleteMapping("/parts")
+@ApiOperation(value = "Exclui todas as peças")
+@ResponseStatus(HttpStatus.NO_CONTENT)
+public ResponseEntity<HttpStatus> deleteAllParts() {
+    try {
+        partRepository.deleteAll();
+        return new ResponseEntity<HttpStatus>(HttpStatus.NO_CONTENT);
+    } catch (Exception e) {
+        return new ResponseEntity<HttpStatus>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
+```
+
+## Notes
+
+- Both endpoints return 204 No Content on success, regardless of whether the part(s) existed
+- Delete by ID will return 204 even if the specified ID doesn't exist
+- The delete all operation removes every part from the database
+- If an error occurs during deletion, 500 Internal Server Error is returned
+- Deleting a part does not automatically delete its relationships with vehicles
+
+## Important Considerations
+
+<Info>
+  **Many-to-Many Relationships**: Parts have many-to-many relationships with vehicles. When deleting a part, ensure your database is properly configured to handle cascading deletes or orphaned relationship records.
+</Info>
+
+### Best Practices
+
+1. **Confirm before deletion**: Always confirm with users before deleting, especially for delete all operations
+2. **Check relationships**: Before deleting a part, consider checking if it has related vehicles
+3. **Backup data**: For production environments, ensure you have backups before bulk deletion operations
+4. **Logging**: Implement audit logging to track deletion operations for compliance and debugging
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card title="Retrieve Parts" icon="list" href="/api/parts/retrieve">
+    List parts before deciding which to delete
+  </Card>
+  
+  <Card title="Create Part" icon="plus" href="/api/parts/create">
+    Create a new part after deletion
+  </Card>
+</CardGroup>

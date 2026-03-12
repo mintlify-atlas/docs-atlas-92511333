@@ -1,0 +1,83 @@
+---
+title: "Relationships API Overview"
+description: "Manage many-to-many relationships between parts and vehicles"
+---
+
+## Introduction
+
+The Relationships API enables you to manage the many-to-many associations between parts and vehicles in the Parts Catalog system. This API allows you to track which vehicles use specific parts and which parts are compatible with specific vehicles.
+
+## Many-to-Many Relationships
+
+The Parts Catalog uses a many-to-many relationship model because:
+
+- **One part can fit multiple vehicles** - For example, a brake pad might be compatible with several car models
+- **One vehicle needs multiple parts** - Any vehicle in the catalog is composed of numerous parts
+- **Flexible catalog management** - As new vehicle models are added or part compatibility is updated, relationships can be easily modified
+
+### Database Implementation
+
+The relationship is implemented using a join table called `part_vehicle` that links the `part` and `vehicle` tables. The `Part` model includes:
+
+```java
+@ManyToMany
+@JoinTable(
+    name = "part_vehicle",
+    joinColumns = @JoinColumn(name = "part_id"),
+    inverseJoinColumns = @JoinColumn(name = "vehicle_id")
+)
+private Set<Vehicle> vehicles = new HashSet<>();
+```
+
+Reference: `~/workspace/source/backend/src/main/java/br/com/tarcnux/spring/jpa/postgresql/model/Part.java:36-38`
+
+## Why Link Parts to Vehicles?
+
+Linking parts to vehicles provides several benefits:
+
+1. **Compatibility Tracking** - Quickly identify which parts work with specific vehicles
+2. **Inventory Management** - Understand which parts are needed for your vehicle fleet
+3. **Cross-Reference Search** - Find all vehicles that use a particular part or all parts for a vehicle
+4. **Customer Service** - Help customers find the right parts for their vehicles
+5. **Data Integrity** - Maintain accurate relationships beyond simple text fields
+
+## Available Endpoints
+
+The Relationships API provides three core endpoints:
+
+<CardGroup cols={2}>
+  <Card title="List Relationships" icon="list" href="/api/relationships/list">
+    Get all vehicles associated with a specific part
+  </Card>
+  <Card title="Add Relationship" icon="plus" href="/api/relationships/add">
+    Link a vehicle to a part
+  </Card>
+  <Card title="Remove Relationship" icon="trash" href="/api/relationships/remove">
+    Remove a vehicle-part association
+  </Card>
+</CardGroup>
+
+## Base URL
+
+All relationship endpoints are accessible under:
+
+```
+http://localhost:8080/api/v1/parts/{partId}/vehicles
+```
+
+## Common Response Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 OK | Request successful |
+| 404 NOT_FOUND | Part or vehicle not found |
+| 500 INTERNAL_SERVER_ERROR | Server error occurred |
+
+## Getting Started
+
+To start managing relationships:
+
+1. Ensure you have both parts and vehicles created in the system
+2. Use the [Add Relationship](/api/relationships/add) endpoint to link them
+3. Query relationships with the [List Relationships](/api/relationships/list) endpoint
+4. Remove associations when needed with the [Remove Relationship](/api/relationships/remove) endpoint

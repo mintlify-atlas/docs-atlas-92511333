@@ -1,0 +1,187 @@
+---
+title: Vehicles Management
+description: Organize and manage vehicle information for your parts catalog
+---
+
+The Vehicles Management feature allows you to maintain a database of vehicles that can be associated with parts in your catalog. This helps organize your inventory by vehicle compatibility and makes it easier for users to find parts for specific vehicles.
+
+## Overview
+
+The vehicles management system enables you to:
+
+- Create new vehicle entries
+- View and browse all registered vehicles
+- Search vehicles by name
+- Update vehicle information
+- Delete individual vehicles or all vehicles at once
+
+## Creating New Vehicles
+
+To add a new vehicle to the system:
+
+<Steps>
+  <Step title="Access Vehicle Creation">
+    Navigate to the vehicles section and select the option to add a new vehicle.
+  </Step>
+  
+  <Step title="Enter Vehicle Details">
+    Fill in the vehicle information:
+    - **Name**: The vehicle name or model (e.g., "Fusca", "Golf GTI", "Civic")
+  </Step>
+  
+  <Step title="Submit">
+    Save the vehicle entry to add it to your database.
+  </Step>
+</Steps>
+
+<Info>
+  Vehicle names should be clear and specific to avoid confusion when linking parts later.
+</Info>
+
+## Viewing Vehicles List
+
+The vehicles list provides a comprehensive view of all registered vehicles in your system:
+
+- Vehicles are displayed in a list format
+- Each entry shows the vehicle name
+- Click on any vehicle to view its detailed information
+- The selected vehicle is highlighted in the list
+
+### Vehicle Details Panel
+
+When you select a vehicle from the list, the details panel displays:
+
+- **ID**: The unique identifier for the vehicle
+- **Name**: The vehicle name or model
+
+## Searching Vehicles
+
+To quickly find a specific vehicle:
+
+<Steps>
+  <Step title="Enter Search Term">
+    Type a keyword or vehicle name in the "Buscar veículo por nome" (Search vehicle by name) search field.
+  </Step>
+  
+  <Step title="Execute Search">
+    Click the "Buscar" (Search) button to filter the vehicles list.
+  </Step>
+</Steps>
+
+The search performs a partial match, returning all vehicles whose names contain the search term.
+
+## Updating Vehicle Information
+
+To modify an existing vehicle entry:
+
+<Steps>
+  <Step title="Select the Vehicle">
+    Click on the vehicle you want to update from the vehicles list.
+  </Step>
+  
+  <Step title="Access Edit Mode">
+    Navigate to the edit interface for the selected vehicle.
+  </Step>
+  
+  <Step title="Modify Details">
+    Update the vehicle information as needed.
+  </Step>
+  
+  <Step title="Save Changes">
+    Submit the updated information to save your changes.
+  </Step>
+</Steps>
+
+## Deleting Vehicles
+
+### Delete Individual Vehicle
+
+To remove a single vehicle from the system:
+
+<Steps>
+  <Step title="Locate the Vehicle">
+    Find the vehicle you want to delete in the vehicles list.
+  </Step>
+  
+  <Step title="Click Delete">
+    Click the "Apagar" (Delete) button next to the vehicle name.
+  </Step>
+  
+  <Step title="Confirm Deletion">
+    The vehicle will be removed from the list immediately.
+  </Step>
+</Steps>
+
+<Note>
+  If the vehicle is currently linked to any parts, consider the impact on those relationships before deleting.
+</Note>
+
+### Delete All Vehicles
+
+To clear all vehicles from the database:
+
+<Steps>
+  <Step title="Locate Delete All Button">
+    On the vehicles list page, find the "Apagar todos os veículos" (Delete all vehicles) button.
+  </Step>
+  
+  <Step title="Execute Deletion">
+    Click the button to remove all vehicles. The list will refresh to show an empty state.
+  </Step>
+</Steps>
+
+<Warning>
+  Deleting all vehicles is a permanent action. This may affect existing part-vehicle relationships in your catalog.
+</Warning>
+
+## Use Cases
+
+Vehicles management supports various business workflows:
+
+<CardGroup cols={2}>
+  <Card title="Inventory Organization" icon="boxes-stacked">
+    Group parts by vehicle compatibility for easier inventory management and warehouse organization.
+  </Card>
+  
+  <Card title="Customer Service" icon="headset">
+    Quickly identify which parts are compatible with a customer's vehicle, improving service speed and accuracy.
+  </Card>
+  
+  <Card title="Catalog Management" icon="book">
+    Maintain a structured catalog where parts are organized by vehicle application, making it easier to manage inventory.
+  </Card>
+  
+  <Card title="Sales Support" icon="cart-shopping">
+    Help sales teams recommend the right parts by clearly showing vehicle compatibility.
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Consistent Naming">
+    Use a consistent naming convention for vehicles (e.g., always include make and model, use standard abbreviations). This ensures better search results and reduces duplicate entries.
+  </Accordion>
+  
+  <Accordion title="Vehicle Database Planning">
+    Before creating many part-vehicle relationships, establish your complete vehicle list. This prevents the need to add vehicles later and retroactively update part associations.
+  </Accordion>
+  
+  <Accordion title="Regular Maintenance">
+    Periodically review your vehicle list to remove obsolete entries and ensure all vehicles are still relevant to your current inventory.
+  </Accordion>
+  
+  <Accordion title="Relationship Awareness">
+    Before deleting a vehicle, check if it has associated parts. Consider unlinking parts first or ensuring those relationships are no longer needed.
+  </Accordion>
+</AccordionGroup>
+
+## Integration with Parts
+
+Vehicles in this system are designed to work closely with the parts catalog:
+
+- Vehicles can be linked to multiple parts (many-to-many relationship)
+- Parts can be searched by vehicle application
+- Vehicle associations help users find compatible parts quickly
+
+For more information on managing part-vehicle relationships, see the [Part-Vehicle Relationships](/features/relationships) documentation.

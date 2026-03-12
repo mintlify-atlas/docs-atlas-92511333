@@ -1,0 +1,122 @@
+---
+title: 'Parts API Overview'
+description: 'Complete reference for the Parts Catalog REST API'
+---
+
+## Introduction
+
+The Parts API provides endpoints to manage automotive parts in the catalog system. You can create, retrieve, update, delete, and search for parts using this REST API.
+
+## Base URL
+
+```
+http://localhost:8080/api/v1
+```
+
+## Authentication
+
+Currently, the API does not require authentication. CORS is enabled for `http://localhost:8081` to allow frontend access.
+
+## Common Response Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 OK | Request successful |
+| 201 Created | Resource created successfully |
+| 204 No Content | Request successful, no content to return |
+| 404 Not Found | Resource not found |
+| 500 Internal Server Error | Server error occurred |
+
+## Swagger Documentation
+
+Interactive API documentation is available via Swagger UI:
+
+```
+http://localhost:8080/swagger-ui.html
+```
+
+## Available Endpoints
+
+<CardGroup cols={2}>
+  <Card title="Create Part" icon="plus" href="/api/parts/create">
+    POST /api/v1/parts - Create a new part in the catalog
+  </Card>
+  
+  <Card title="Retrieve Parts" icon="list" href="/api/parts/retrieve">
+    GET /api/v1/parts - List all parts or get a specific part by ID
+  </Card>
+  
+  <Card title="Update Part" icon="pen" href="/api/parts/update">
+    PUT /api/v1/parts/:id - Update an existing part
+  </Card>
+  
+  <Card title="Delete Parts" icon="trash" href="/api/parts/delete">
+    DELETE /api/v1/parts - Delete one or all parts
+  </Card>
+  
+  <Card title="Search Parts" icon="magnifying-glass" href="/api/parts/search">
+    GET /api/v1/parts?name=keyword - Search parts by name or vehicle
+  </Card>
+</CardGroup>
+
+## Part Object Schema
+
+All endpoints use the following Part object structure:
+
+<ResponseField name="id" type="long" required>
+  Auto-generated unique identifier for the part
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  Name of the part
+</ResponseField>
+
+<ResponseField name="applicationVehicle" type="string">
+  Vehicle application description
+</ResponseField>
+
+<ResponseField name="netWeight" type="double">
+  Net weight of the part in the specified unit
+</ResponseField>
+
+<ResponseField name="grossWeight" type="double">
+  Gross weight of the part in the specified unit
+</ResponseField>
+
+<ResponseField name="vehicles" type="Set<Vehicle>">
+  Set of related vehicles (many-to-many relationship)
+</ResponseField>
+
+## Example Part Object
+
+```json
+{
+  "id": 1,
+  "name": "Polia",
+  "applicationVehicle": "Fusca",
+  "netWeight": 9.87,
+  "grossWeight": 10.98,
+  "vehicles": []
+}
+```
+
+## Getting Started
+
+To get started with the Parts API:
+
+1. Ensure the backend is running at `http://localhost:8080`
+2. Create your first part using the [Create Part](/api/parts/create) endpoint
+3. Retrieve and list parts using the [Retrieve Parts](/api/parts/retrieve) endpoint
+4. Use [Search](/api/parts/search) to find parts by name or vehicle application
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Create Part" icon="plus" href="/api/parts/create">
+    Learn how to add new parts to the catalog
+  </Card>
+  
+  <Card title="Search Parts" icon="magnifying-glass" href="/api/parts/search">
+    Discover how to search for parts
+  </Card>
+</CardGroup>

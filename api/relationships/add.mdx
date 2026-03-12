@@ -1,0 +1,208 @@
+---
+title: "Add Vehicle to Part"
+api: "POST /api/v1/parts/{partId}/vehicles/{vehicleId}"
+description: "Create a relationship between a part and a vehicle"
+---
+
+## Overview
+
+This endpoint creates a many-to-many relationship between a part and a vehicle. It links the specified vehicle to the specified part, indicating that the part is compatible with or used in that vehicle.
+
+## Endpoint
+
+```
+POST /api/v1/parts/{partId}/vehicles/{vehicleId}
+```
+
+## Path Parameters
+
+<ParamField path="partId" type="Long" required>
+  The unique identifier of the part to which you want to add a vehicle relationship
+</ParamField>
+
+<ParamField path="vehicleId" type="Long" required>
+  The unique identifier of the vehicle to associate with the part
+</ParamField>
+
+## Request
+
+No request body is required. The relationship is created using only the path parameters.
+
+## Response
+
+Returns the updated `Part` object with its full set of associated vehicles, including the newly added one.
+
+### Response Structure
+
+```json
+{
+  "id": 1,
+  "name": "Polia",
+  "applicationVehicle": "Fusca",
+  "netWeight": 9.87,
+  "grossWeight": 10.98,
+  "vehicles": [
+    {
+      "id": 1,
+      "name": "Fusca",
+      "manufacturer": "Volkswagen",
+      "year": 1970
+    },
+    {
+      "id": 2,
+      "name": "Gol",
+      "manufacturer": "Volkswagen",
+      "year": 2020
+    }
+  ]
+}
+```
+
+### Success Response
+
+<ResponseField name="200 OK" type="Part">
+  Successfully created the relationship. Returns the updated part with all associated vehicles.
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404 NOT_FOUND" type="Error">
+  Either the specified part ID or vehicle ID does not exist in the database.
+</ResponseField>
+
+## Controller Implementation
+
+The endpoint is implemented in the `PartController` class:
+
+```java
+@PostMapping("/parts/{partId}/vehicles/{vehicleId}")
+@ApiOperation(value = "Relaciona um veículo a uma peça")
+@ResponseStatus(HttpStatus.OK)
+public ResponseEntity<Part> addVehicleToPart(
+        @PathVariable("partId") Long partId,
+        @PathVariable("vehicleId") Long vehicleId) {
+    Optional<Part> partData = partRepository.findById(partId);
+    Optional<Vehicle> vehicleData = vehicleRepository.findById(vehicleId);
+
+    if (!partData.isPresent() || !vehicleData.isPresent()) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    Part part = partData.get();
+    part.addVehicle(vehicleData.get());
+    return new ResponseEntity<>(partRepository.save(part), HttpStatus.OK);
+}
+```
+
+Reference: `~/workspace/source/backend/src/main/java/br/com/tarcnux/spring/jpa/postgresql/controller/PartController.java:154-169`
+
+## Bidirectional Relationship
+
+The `addVehicle` method in the `Part` model maintains bidirectional consistency:
+
+```java
+public void addVehicle(Vehicle vehicle) {
+    this.vehicles.add(vehicle);
+    vehicle.getParts().add(this);
+}
+```
+
+Reference: `~/workspace/source/backend/src/main/java/br/com/tarcnux/spring/jpa/postgresql/model/Part.java:94-97`
+
+This ensures that:
+- The vehicle is added to the part's vehicle set
+- The part is added to the vehicle's part set
+- Both sides of the relationship are synchronized
+
+## Example Usage
+
+### Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "http://localhost:8080/api/v1/parts/1/vehicles/2" \
+  -H "Content-Type: application/json"
+```
+
+```javascript JavaScript
+fetch('http://localhost:8080/api/v1/parts/1/vehicles/2', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+  .then(response => response.json())
+  .then(data => console.log(data));
+```
+
+```java Java
+RestTemplate restTemplate = new RestTemplate();
+String url = "http://localhost:8080/api/v1/parts/1/vehicles/2";
+ResponseEntity<Part> response = restTemplate.postForEntity(url, null, Part.class);
+Part updatedPart = response.getBody();
+```
+
+```python Python
+import requests
+
+url = "http://localhost:8080/api/v1/parts/1/vehicles/2"
+response = requests.post(url)
+updated_part = response.json()
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "id": 1,
+  "name": "Polia",
+  "applicationVehicle": "Fusca",
+  "netWeight": 9.87,
+  "grossWeight": 10.98,
+  "vehicles": [
+    {
+      "id": 1,
+      "name": "Fusca",
+      "manufacturer": "Volkswagen",
+      "year": 1970
+    },
+    {
+      "id": 2,
+      "name": "Gol",
+      "manufacturer": "Volkswagen",
+      "year": 2020
+    }
+  ]
+}
+```
+
+## Use Cases
+
+- **Part Compatibility** - Mark a part as compatible with a new vehicle model
+- **Catalog Expansion** - Add vehicle relationships as new compatibility information becomes available
+- **Inventory Management** - Link parts to vehicles for better stock planning
+- **Customer Service** - Build cross-reference data to help customers find parts
+
+## Important Notes
+
+<Note>
+  **Duplicate Prevention**: If the relationship already exists, the operation is idempotent and won't create duplicate entries due to the use of `Set<Vehicle>` in the Part model.
+</Note>
+
+<Warning>
+  **Prerequisite**: Both the part and vehicle must exist in the database before creating a relationship. If either ID is invalid, the endpoint returns `404 NOT_FOUND`.
+</Warning>
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card title="List Relationships" icon="list" href="/api/relationships/list">
+    View all vehicles for a part
+  </Card>
+  <Card title="Remove Relationship" icon="trash" href="/api/relationships/remove">
+    Remove this vehicle-part association
+  </Card>
+</CardGroup>

@@ -1,0 +1,247 @@
+---
+title: 'Retrieve Parts'
+description: 'Get all parts or retrieve a specific part by ID'
+---
+
+## List All Parts
+
+```
+GET http://localhost:8080/api/v1/parts
+```
+
+Retrieves all parts from the catalog in alphabetical order by name.
+
+### Response
+
+Returns an array of Part objects.
+
+<ResponseField name="id" type="long">
+  Unique identifier for the part
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Name of the part
+</ResponseField>
+
+<ResponseField name="applicationVehicle" type="string">
+  Vehicle application description
+</ResponseField>
+
+<ResponseField name="netWeight" type="double">
+  Net weight of the part
+</ResponseField>
+
+<ResponseField name="grossWeight" type="double">
+  Gross weight of the part
+</ResponseField>
+
+### Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 OK | Parts retrieved successfully |
+| 204 No Content | No parts found in the database |
+| 500 Internal Server Error | An error occurred |
+
+### Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET http://localhost:8080/api/v1/parts
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:8080/api/v1/parts');
+const parts = await response.json();
+console.log(parts);
+```
+
+```python Python
+import requests
+
+response = requests.get('http://localhost:8080/api/v1/parts')
+parts = response.json()
+print(parts)
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json 200 OK
+[
+  {
+    "id": 1,
+    "name": "Alternador",
+    "applicationVehicle": "Gol",
+    "netWeight": 5.5,
+    "grossWeight": 6.2
+  },
+  {
+    "id": 2,
+    "name": "Polia",
+    "applicationVehicle": "Fusca",
+    "netWeight": 9.87,
+    "grossWeight": 10.98
+  }
+]
+```
+
+### Controller Implementation
+
+```java PartController.java:43-71
+@GetMapping("/parts")
+@ApiOperation(value = "Exibe todas as peças em ordem alfabética")
+@ResponseStatus(HttpStatus.OK)
+public ResponseEntity<List<Part>> getAllParts(
+        @RequestParam(required = false) String name,
+        @RequestParam(required = false) String vehicle) {
+    
+    try {
+        List<Part> parts = new ArrayList<Part>();
+        
+        if (name == null && vehicle == null) {
+            partRepository.findByOrderByNameAsc().forEach(parts::add);
+        } else if (vehicle == null) {
+            partRepository.findByNameContainingIgnoreCaseOrderByNameAsc(name)
+                .forEach(parts::add);
+        } else {
+            partRepository.findByApplicationVehicleContainingIgnoreCaseOrderByNameAsc(vehicle)
+                .forEach(parts::add);
+        }
+        
+        if (parts.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        
+        return new ResponseEntity<List<Part>>(parts, HttpStatus.OK);
+        
+    } catch (Exception e) {
+        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
+```
+
+---
+
+## Get Part by ID
+
+```
+GET http://localhost:8080/api/v1/parts/{id}
+```
+
+Retrieves a specific part by its unique identifier.
+
+### Path Parameters
+
+<ParamField path="id" type="long" required>
+  The unique identifier of the part to retrieve
+</ParamField>
+
+### Response
+
+Returns a single Part object.
+
+<ResponseField name="id" type="long">
+  Unique identifier for the part
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Name of the part
+</ResponseField>
+
+<ResponseField name="applicationVehicle" type="string">
+  Vehicle application description
+</ResponseField>
+
+<ResponseField name="netWeight" type="double">
+  Net weight of the part
+</ResponseField>
+
+<ResponseField name="grossWeight" type="double">
+  Gross weight of the part
+</ResponseField>
+
+### Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 OK | Part retrieved successfully |
+| 404 Not Found | Part with the specified ID does not exist |
+
+### Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET http://localhost:8080/api/v1/parts/1
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:8080/api/v1/parts/1');
+const part = await response.json();
+console.log(part);
+```
+
+```python Python
+import requests
+
+response = requests.get('http://localhost:8080/api/v1/parts/1')
+part = response.json()
+print(part)
+```
+
+</CodeGroup>
+
+### Example Response
+
+```json 200 OK
+{
+  "id": 1,
+  "name": "Polia",
+  "applicationVehicle": "Fusca",
+  "netWeight": 9.87,
+  "grossWeight": 10.98
+}
+```
+
+```json 404 Not Found
+(Empty response body)
+```
+
+### Controller Implementation
+
+```java PartController.java:73-84
+@GetMapping("/parts/{id}")
+@ApiOperation(value = "Exibe uma peça específica")
+@ResponseStatus(HttpStatus.OK)
+public ResponseEntity<Part> getPartById(@PathVariable("id") Long id) {
+    Optional<Part> partData = partRepository.findById(id);
+    
+    if (partData.isPresent()) {
+        return new ResponseEntity<Part>(partData.get(), HttpStatus.OK);
+    } else {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+}
+```
+
+## Notes
+
+- Parts are returned in alphabetical order by name when listing all parts
+- If no parts exist in the database, the list endpoint returns 204 No Content
+- The get by ID endpoint returns 404 if the part doesn't exist
+- This endpoint also supports search parameters (see [Search Parts](/api/parts/search))
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card title="Search Parts" icon="magnifying-glass" href="/api/parts/search">
+    Search parts by name or vehicle application
+  </Card>
+  
+  <Card title="Update Part" icon="pen" href="/api/parts/update">
+    Update a retrieved part
+  </Card>
+</CardGroup>

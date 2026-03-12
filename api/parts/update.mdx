@@ -1,0 +1,194 @@
+---
+title: 'Update Part'
+description: 'Update an existing part in the catalog'
+api: 'PUT /api/v1/parts/{id}'
+---
+
+## Endpoint
+
+```
+PUT http://localhost:8080/api/v1/parts/{id}
+```
+
+Updates an existing part with the specified ID. All fields in the request body will replace the current values.
+
+## Path Parameters
+
+<ParamField path="id" type="long" required>
+  The unique identifier of the part to update
+</ParamField>
+
+## Request Body
+
+<ParamField body="name" type="string" required>
+  Updated name of the part
+</ParamField>
+
+<ParamField body="applicationVehicle" type="string">
+  Updated vehicle application description
+</ParamField>
+
+<ParamField body="netWeight" type="double">
+  Updated net weight of the part
+</ParamField>
+
+<ParamField body="grossWeight" type="double">
+  Updated gross weight of the part
+</ParamField>
+
+## Response
+
+Returns the updated Part object.
+
+<ResponseField name="id" type="long">
+  The part's unique identifier (unchanged)
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Updated name of the part
+</ResponseField>
+
+<ResponseField name="applicationVehicle" type="string">
+  Updated vehicle application description
+</ResponseField>
+
+<ResponseField name="netWeight" type="double">
+  Updated net weight
+</ResponseField>
+
+<ResponseField name="grossWeight" type="double">
+  Updated gross weight
+</ResponseField>
+
+## Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 OK | Part was successfully updated |
+| 404 Not Found | Part with the specified ID does not exist |
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X PUT http://localhost:8080/api/v1/parts/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Atualizado Polia",
+    "applicationVehicle": "Atualizado Fusca",
+    "netWeight": 9.87,
+    "grossWeight": 10.98
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:8080/api/v1/parts/1', {
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    name: 'Atualizado Polia',
+    applicationVehicle: 'Atualizado Fusca',
+    netWeight: 9.87,
+    grossWeight: 10.98
+  })
+});
+
+const updatedPart = await response.json();
+console.log(updatedPart);
+```
+
+```python Python
+import requests
+
+url = 'http://localhost:8080/api/v1/parts/1'
+data = {
+    'name': 'Atualizado Polia',
+    'applicationVehicle': 'Atualizado Fusca',
+    'netWeight': 9.87,
+    'grossWeight': 10.98
+}
+
+response = requests.put(url, json=data)
+updated_part = response.json()
+print(updated_part)
+```
+
+</CodeGroup>
+
+## Example Response
+
+```json 200 OK
+{
+  "id": 1,
+  "name": "Atualizado Polia",
+  "applicationVehicle": "Atualizado Fusca",
+  "netWeight": 9.87,
+  "grossWeight": 10.98
+}
+```
+
+```json 404 Not Found
+(Empty response body)
+```
+
+## Controller Implementation
+
+The endpoint is implemented in the `PartController` class:
+
+```java PartController.java:100-117
+@PutMapping("/parts/{id}")
+@ApiOperation(value = "Atualiza uma peça específica")
+@ResponseStatus(HttpStatus.OK)
+@ResponseBody
+public ResponseEntity<Part> updatePart(@PathVariable("id") Long id, 
+                                       @RequestBody Part part) {
+    Optional<Part> partData = partRepository.findById(id);
+    
+    if (partData.isPresent()) {
+        Part _part = partData.get();
+        _part.setName(part.getName());
+        _part.setApplicationVehicle(part.getApplicationVehicle());
+        _part.setNetWeight(part.getNetWeight());
+        _part.setGrossWeight(part.getGrossWeight());
+        return new ResponseEntity<Part>(partRepository.save(_part), HttpStatus.OK);
+    } else {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+}
+```
+
+## Notes
+
+- The `id` in the path parameter must match an existing part
+- All fields should be included in the request body; omitted fields will be set to null
+- The `id` field cannot be changed through this endpoint
+- Returns 404 if the part with the specified ID doesn't exist
+- Weight values should be decimal numbers
+
+## Validation Best Practices
+
+When updating parts, consider these validations:
+
+<Warning>
+  The frontend application validates that net weight should not exceed gross weight. While the backend doesn't enforce this, it's recommended to maintain this business rule in your application.
+</Warning>
+
+- Ensure `name` is not empty
+- Validate that `netWeight` is less than or equal to `grossWeight`
+- Use decimal numbers with appropriate precision for weights
+- Handle 404 responses gracefully when the part doesn't exist
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card title="Retrieve Part" icon="list" href="/api/parts/retrieve">
+    Get the part details before updating
+  </Card>
+  
+  <Card title="Delete Part" icon="trash" href="/api/parts/delete">
+    Delete a part instead of updating it
+  </Card>
+</CardGroup>

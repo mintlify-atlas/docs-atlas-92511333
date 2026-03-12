@@ -1,0 +1,441 @@
+---
+title: Routing
+description: Vue Router configuration and navigation structure
+---
+
+The Parts Catalog uses Vue Router 3.5.1 for client-side routing with HTML5 history mode.
+
+## Router Configuration
+
+The router is configured in `src/router.js` with the following setup:
+
+```javascript
+import Vue from "vue";
+import Router from "vue-router";
+
+Vue.use(Router);
+
+export default new Router({
+  mode: "history",
+  routes: [
+    // Route definitions
+  ]
+});
+```
+
+**Key Configuration:**
+- **Mode**: `history` - Uses HTML5 History API for clean URLs without hash (#)
+- **Lazy Loading**: All components are loaded dynamically using `import()`
+
+## Route Definitions
+
+### Parts Routes
+
+<AccordionGroup>
+  <Accordion title="Parts List - / and /parts">
+    **Route Definition:**
+    ```javascript
+    {
+      path: "/",
+      alias: "/parts",
+      name: "parts",
+      component: () => import("./components/PartsList")
+    }
+    ```
+
+    **Details:**
+    - **Path**: `/` (root) with alias `/parts`
+    - **Component**: `PartsList.vue`
+    - **Purpose**: Display list of all parts with search functionality
+    - **Access**: Home page and parts listing page
+  </Accordion>
+
+  <Accordion title="Part Details - /parts/:id">
+    **Route Definition:**
+    ```javascript
+    {
+      path: "/parts/:id",
+      name: "part-details",
+      component: () => import("./components/Part")
+    }
+    ```
+
+    **Details:**
+    - **Path**: `/parts/:id` (dynamic route parameter)
+    - **Component**: `Part.vue`
+    - **Purpose**: View and edit a specific part
+    - **Route Parameter**: `id` - The part ID
+
+    **Accessing Route Parameters:**
+    ```javascript
+    mounted() {
+      this.getPart(this.$route.params.id);
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Add Part - /add">
+    **Route Definition:**
+    ```javascript
+    {
+      path: "/add",
+      name: "add",
+      component: () => import("./components/AddPart")
+    }
+    ```
+
+    **Details:**
+    - **Path**: `/add`
+    - **Component**: `AddPart.vue`
+    - **Purpose**: Create a new part
+  </Accordion>
+</AccordionGroup>
+
+### Vehicles Routes
+
+<AccordionGroup>
+  <Accordion title="Vehicles List - /vehicles">
+    **Route Definition:**
+    ```javascript
+    {
+      path: "/vehicles",
+      name: "vehicles",
+      component: () => import("./components/VehiclesList")
+    }
+    ```
+
+    **Details:**
+    - **Path**: `/vehicles`
+    - **Component**: `VehiclesList.vue`
+    - **Purpose**: Display list of all vehicles
+  </Accordion>
+
+  <Accordion title="Add Vehicle - /vehicles/add">
+    **Route Definition:**
+    ```javascript
+    {
+      path: "/vehicles/add",
+      name: "add-vehicle",
+      component: () => import("./components/AddVehicle")
+    }
+    ```
+
+    **Details:**
+    - **Path**: `/vehicles/add`
+    - **Component**: `AddVehicle.vue`
+    - **Purpose**: Create a new vehicle
+  </Accordion>
+</AccordionGroup>
+
+## Navigation Methods
+
+### Declarative Navigation
+
+Using `<router-link>` in templates:
+
+```vue
+<template>
+  <!-- Navigate to parts list -->
+  <router-link to="/parts">View Parts</router-link>
+  
+  <!-- Navigate to add part -->
+  <router-link to="/add">Add Part</router-link>
+  
+  <!-- Navigate with route name -->
+  <router-link :to="{ name: 'vehicles' }">Vehicles</router-link>
+  
+  <!-- Navigate with dynamic parameter -->
+  <a :href="'/parts/' + currentPart.id">Edit Part</a>
+</template>
+```
+
+### Programmatic Navigation
+
+Using `this.$router.push()` in component methods:
+
+```javascript
+// Navigate to parts list after update
+updatePart() {
+  PartDataService.update(this.currentPart.id, this.currentPart)
+    .then(() => {
+      this.message = "Peça atualizada com sucesso!";
+      this.$router.push({ name: "parts" });
+    })
+    .catch(e => {
+      console.error(e);
+    });
+}
+
+// Navigate after delete
+deletePart() {
+  PartDataService.delete(this.currentPart.id)
+    .then(() => {
+      this.$router.push({ name: "parts" });
+    })
+    .catch(e => {
+      console.error(e);
+    });
+}
+```
+
+## Data Services Integration
+
+Routes work seamlessly with data services to fetch and manipulate data.
+
+### PartDataService
+
+Location: `src/services/PartDataService.js`
+
+```javascript
+import http from "../http-common";
+
+class PartDataService {
+  getAll() {
+    return http.get("/parts");
+  }
+
+  get(id) {
+    return http.get(`/parts/${id}`);
+  }
+
+  create(data) {
+    return http.post("/parts", data);
+  }
+
+  update(id, data) {
+    return http.put(`/parts/${id}`, data);
+  }
+
+  delete(id) {
+    return http.delete(`/parts/${id}`);
+  }
+
+  deleteAll() {
+    return http.delete(`/parts`);
+  }
+
+  findByName(name) {
+    return http.get(`/parts?name=${name}`);
+  }
+
+  findByVehicle(vehicle) {
+    return http.get(`/parts?vehicle=${vehicle}`);
+  }
+}
+
+export default new PartDataService();
+```
+
+### VehicleDataService
+
+Location: `src/services/VehicleDataService.js`
+
+```javascript
+import http from "../http-common";
+
+class VehicleDataService {
+  getAll() {
+    return http.get("/vehicles");
+  }
+
+  get(id) {
+    return http.get(`/vehicles/${id}`);
+  }
+
+  create(data) {
+    return http.post("/vehicles", data);
+  }
+
+  update(id, data) {
+    return http.put(`/vehicles/${id}`, data);
+  }
+
+  delete(id) {
+    return http.delete(`/vehicles/${id}`);
+  }
+
+  deleteAll() {
+    return http.delete(`/vehicles`);
+  }
+
+  findByName(name) {
+    return http.get(`/vehicles?name=${name}`);
+  }
+
+  findByPart(partId) {
+    return http.get(`/parts/${partId}/vehicles`);
+  }
+
+  addToPart(partId, vehicleId) {
+    return http.post(`/parts/${partId}/vehicles/${vehicleId}`);
+  }
+
+  removeFromPart(partId, vehicleId) {
+    return http.delete(`/parts/${partId}/vehicles/${vehicleId}`);
+  }
+}
+
+export default new VehicleDataService();
+```
+
+## HTTP Client Configuration
+
+All data services use a centralized Axios configuration.
+
+Location: `src/http-common.js`
+
+```javascript
+import axios from "axios";
+
+export default axios.create({
+  baseURL: "http://localhost:8080/api/v1",
+  headers: {
+    "Content-type": "application/json"
+  }
+});
+```
+
+**Configuration Details:**
+- **Base URL**: `http://localhost:8080/api/v1`
+- **Headers**: JSON content type
+- **Export**: Default Axios instance used by all services
+
+<Warning>
+  Update the `baseURL` in `http-common.js` if your backend runs on a different host or port.
+</Warning>
+
+## Route Visualization
+
+```
+Application Routes
+├── / (alias: /parts)           → PartsList.vue
+├── /parts/:id                  → Part.vue
+├── /add                        → AddPart.vue
+├── /vehicles                   → VehiclesList.vue
+└── /vehicles/add               → AddVehicle.vue
+```
+
+## API Endpoint Mapping
+
+### Parts Endpoints
+
+| Route | HTTP Method | API Endpoint | Purpose |
+|-------|-------------|--------------|----------|
+| `/` | GET | `/parts` | List all parts |
+| `/parts/:id` | GET | `/parts/:id` | Get part details |
+| `/add` | POST | `/parts` | Create new part |
+| `/parts/:id` | PUT | `/parts/:id` | Update part |
+| `/parts/:id` | DELETE | `/parts/:id` | Delete part |
+
+### Vehicles Endpoints
+
+| Route | HTTP Method | API Endpoint | Purpose |
+|-------|-------------|--------------|----------|
+| `/vehicles` | GET | `/vehicles` | List all vehicles |
+| `/vehicles/add` | POST | `/vehicles` | Create new vehicle |
+| - | GET | `/parts/:partId/vehicles` | Get vehicles for a part |
+| - | POST | `/parts/:partId/vehicles/:vehicleId` | Link vehicle to part |
+| - | DELETE | `/parts/:partId/vehicles/:vehicleId` | Unlink vehicle from part |
+
+## Usage Examples
+
+### Example 1: Fetching Parts on Route Load
+
+```javascript
+export default {
+  name: "parts-list",
+  data() {
+    return {
+      parts: []
+    };
+  },
+  methods: {
+    retrieveParts() {
+      PartDataService.getAll()
+        .then(response => {
+          this.parts = response.data;
+        })
+        .catch(e => {
+          console.error(e);
+        });
+    }
+  },
+  mounted() {
+    this.retrieveParts();
+  }
+};
+```
+
+### Example 2: Navigating After Create
+
+```javascript
+savePart() {
+  const data = {
+    name: this.part.name,
+    applicationVehicle: this.part.applicationVehicle,
+    netWeight: this.part.netWeight,
+    grossWeight: this.part.grossWeight
+  };
+
+  PartDataService.create(data)
+    .then(response => {
+      this.submitted = true;
+      // Could redirect to parts list:
+      // this.$router.push({ name: 'parts' });
+    })
+    .catch(e => {
+      console.error(e);
+    });
+}
+```
+
+### Example 3: Working with Route Parameters
+
+```javascript
+export default {
+  name: "part",
+  methods: {
+    getPart(id) {
+      PartDataService.get(id)
+        .then(response => {
+          this.currentPart = response.data;
+        })
+        .catch(e => {
+          console.error(e);
+        });
+    }
+  },
+  mounted() {
+    // Get ID from route parameter
+    this.getPart(this.$route.params.id);
+  }
+};
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Lazy Loading" icon="bolt">
+    Use dynamic imports for route components to reduce initial bundle size.
+  </Card>
+  <Card title="Named Routes" icon="tag">
+    Use named routes for programmatic navigation for better maintainability.
+  </Card>
+  <Card title="Error Handling" icon="triangle-exclamation">
+    Always include error handling in API calls and consider navigation guards.
+  </Card>
+  <Card title="Loading States" icon="spinner">
+    Show loading indicators while data is being fetched from the API.
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Components" icon="puzzle-piece" href="/frontend/components">
+    Learn about component structure
+  </Card>
+  <Card title="Backend API" icon="server" href="/api/parts/overview">
+    Explore backend endpoints
+  </Card>
+</CardGroup>
