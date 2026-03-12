@@ -1,0 +1,110 @@
+{
+  "projectType": "saas",
+  "projectName": "Parts Catalog",
+  "projectDescription": "Web application for managing a catalog of auto parts with vehicle associations",
+  "theme": "maple",
+  "primaryColor": "#df7e38",
+  "lightColor": "#667e93",
+  "darkColor": "#ced0d3",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Backend",
+            "pages": [
+              "backend/setup",
+              "backend/database",
+              "backend/testing"
+            ]
+          },
+          {
+            "group": "Frontend",
+            "pages": [
+              "frontend/setup",
+              "frontend/components",
+              "frontend/routing"
+            ]
+          },
+          {
+            "group": "Features",
+            "pages": [
+              "features/parts-management",
+              "features/vehicles-management",
+              "features/relationships"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Parts API",
+            "pages": [
+              "api/parts/overview",
+              "api/parts/create",
+              "api/parts/retrieve",
+              "api/parts/update",
+              "api/parts/delete",
+              "api/parts/search"
+            ]
+          },
+          {
+            "group": "Vehicles API",
+            "pages": [
+              "api/vehicles/overview",
+              "api/vehicles/create",
+              "api/vehicles/retrieve",
+              "api/vehicles/update",
+              "api/vehicles/delete"
+            ]
+          },
+          {
+            "group": "Relationships API",
+            "pages": [
+              "api/relationships/overview",
+              "api/relationships/list",
+              "api/relationships/add",
+              "api/relationships/remove"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Full CRUD operations for parts and vehicles",
+    "Many-to-many relationships between parts and vehicles",
+    "Search parts by name or vehicle application",
+    "REST API with Swagger documentation",
+    "Vue.js frontend with Vue Router",
+    "Spring Data JPA with PostgreSQL",
+    "Unit testing with JUnit and H2"
+  ],
+  "publicApiSurface": [
+    "GET /api/v1/parts",
+    "POST /api/v1/parts",
+    "GET /api/v1/parts/{id}",
+    "PUT /api/v1/parts/{id}",
+    "DELETE /api/v1/parts/{id}",
+    "DELETE /api/v1/parts",
+    "GET /api/v1/vehicles",
+    "POST /api/v1/vehicles",
+    "GET /api/v1/vehicles/{id}",
+    "PUT /api/v1/vehicles/{id}",
+    "DELETE /api/v1/vehicles/{id}",
+    "DELETE /api/v1/vehicles",
+    "GET /api/v1/parts/{partId}/vehicles",
+    "POST /api/v1/parts/{partId}/vehicles/{vehicleId}",
+    "DELETE /api/v1/parts/{partId}/vehicles/{vehicleId}"
+  ]
+}
